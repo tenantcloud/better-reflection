@@ -5,13 +5,16 @@ namespace TenantCloud\BetterReflection\Relocated\PHPStan\Type;
 
 use TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\OutOfClassScope;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ConstantReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Native\NativeParameterReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParameterReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptor;
-use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Php\ClosureCallMethodReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Php\ClosureCallUnresolvedMethodPrototypeReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedMethodPrototypeReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedPropertyPrototypeReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Constant\ConstantArrayType;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Constant\ConstantBooleanType;
@@ -44,7 +47,11 @@ class ClosureType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Typ
     {
         return $this->objectType->getClassName();
     }
-    public function getAncestorWithClassName(string $className) : ?\TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType
+    public function getClassReflection() : ?\TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassReflection
+    {
+        return $this->objectType->getClassReflection();
+    }
+    public function getAncestorWithClassName(string $className) : ?\TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeWithClassName
     {
         return $this->objectType->getAncestorWithClassName($className);
     }
@@ -108,6 +115,10 @@ class ClosureType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Typ
     {
         return $this->objectType->getProperty($propertyName, $scope);
     }
+    public function getUnresolvedPropertyPrototype(string $propertyName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedPropertyPrototypeReflection
+    {
+        return $this->objectType->getUnresolvedPropertyPrototype($propertyName, $scope);
+    }
     public function canCallMethods() : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
     {
         return $this->objectType->canCallMethods();
@@ -118,10 +129,14 @@ class ClosureType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Typ
     }
     public function getMethod(string $methodName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection
     {
+        return $this->getUnresolvedMethodPrototype($methodName, $scope)->getTransformedMethod();
+    }
+    public function getUnresolvedMethodPrototype(string $methodName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedMethodPrototypeReflection
+    {
         if ($methodName === 'call') {
-            return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Php\ClosureCallMethodReflection($this->objectType->getMethod($methodName, $scope), $this);
+            return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Php\ClosureCallUnresolvedMethodPrototypeReflection($this->objectType->getUnresolvedMethodPrototype($methodName, $scope), $this);
         }
-        return $this->objectType->getMethod($methodName, $scope);
+        return $this->objectType->getUnresolvedMethodPrototype($methodName, $scope);
     }
     public function canAccessConstants() : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
     {

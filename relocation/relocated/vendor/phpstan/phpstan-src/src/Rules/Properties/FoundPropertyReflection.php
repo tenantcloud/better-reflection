@@ -7,7 +7,7 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\Scope;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Php\PhpPropertyReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection;
-use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ResolvedPropertyReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\WrapperPropertyReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type;
 class FoundPropertyReflection implements \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection
@@ -88,7 +88,7 @@ class FoundPropertyReflection implements \TenantCloud\BetterReflection\Relocated
     public function isNative() : bool
     {
         $reflection = $this->originalPropertyReflection;
-        if ($reflection instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ResolvedPropertyReflection) {
+        while ($reflection instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\WrapperPropertyReflection) {
             $reflection = $reflection->getOriginalReflection();
         }
         return $reflection instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Php\PhpPropertyReflection;
@@ -96,7 +96,7 @@ class FoundPropertyReflection implements \TenantCloud\BetterReflection\Relocated
     public function getNativeType() : ?\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type
     {
         $reflection = $this->originalPropertyReflection;
-        if ($reflection instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ResolvedPropertyReflection) {
+        while ($reflection instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\WrapperPropertyReflection) {
             $reflection = $reflection->getOriginalReflection();
         }
         if (!$reflection instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Php\PhpPropertyReflection) {

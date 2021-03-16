@@ -11,6 +11,7 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptor;
 use TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeWithClassName;
 interface Scope extends \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer
 {
     public function getFile() : string;
@@ -48,6 +49,7 @@ interface Scope extends \TenantCloud\BetterReflection\Relocated\PHPStan\Reflecti
     public function getNativeType(\TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr $expr) : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type;
     public function doNotTreatPhpDocTypesAsCertain() : self;
     public function resolveName(\TenantCloud\BetterReflection\Relocated\PhpParser\Node\Name $name) : string;
+    public function resolveTypeByName(\TenantCloud\BetterReflection\Relocated\PhpParser\Node\Name $name) : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeWithClassName;
     /**
      * @param mixed $value
      */

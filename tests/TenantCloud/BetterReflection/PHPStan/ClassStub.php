@@ -10,12 +10,11 @@ use Ds\Pair;
  *
  * @extends ParentClassStub<T, SomeStub>
  * @implements ParentInterfaceStub<T, SomeStub>
- *
- * @uses ParentTraitStub<T, SomeStub>
  */
 #[AttributeStub(something: '123')]
 final class ClassStub extends ParentClassStub implements ParentInterfaceStub
 {
+	/* @use ParentTraitStub<T, SomeStub> */
 	use ParentTraitStub;
 
 	/** @var SomeStub[] */

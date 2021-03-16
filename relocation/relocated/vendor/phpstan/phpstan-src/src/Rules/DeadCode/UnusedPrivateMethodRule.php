@@ -78,7 +78,7 @@ class UnusedPrivateMethodRule implements \TenantCloud\BetterReflection\Relocated
                 if (!$methodCallNode->class instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Name) {
                     continue;
                 }
-                $calledOnType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($callScope->resolveName($methodCallNode->class));
+                $calledOnType = $scope->resolveTypeByName($methodCallNode->class);
             }
             if ($classType->isSuperTypeOf($calledOnType)->no()) {
                 continue;

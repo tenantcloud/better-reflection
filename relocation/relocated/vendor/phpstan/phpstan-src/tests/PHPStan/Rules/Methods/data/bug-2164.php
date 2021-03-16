@@ -23,3 +23,14 @@ class B extends \TenantCloud\BetterReflection\Relocated\Bug2164\A
         \TenantCloud\BetterReflection\Relocated\Bug2164\B::staticTest($arg);
     }
 }
+final class B2 extends \TenantCloud\BetterReflection\Relocated\Bug2164\A
+{
+    /**
+     * @param B2|string $arg
+     * @return void
+     */
+    public function test($arg)
+    {
+        \TenantCloud\BetterReflection\Relocated\Bug2164\B2::staticTest($arg);
+    }
+}

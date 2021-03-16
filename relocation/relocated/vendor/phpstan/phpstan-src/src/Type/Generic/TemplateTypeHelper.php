@@ -6,7 +6,6 @@ namespace TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Constant\ConstantArrayType;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\ConstantType;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\ErrorType;
-use TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeTraverser;
 class TemplateTypeHelper
@@ -25,9 +24,6 @@ class TemplateTypeHelper
                 if ($newType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ErrorType) {
                     return $traverse($type->getBound());
                 }
-                if ($newType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType) {
-                    return $traverse($newType->getStaticObjectType());
-                }
                 return $newType;
             }
             return $traverse($type);
@@ -43,10 +39,13 @@ class TemplateTypeHelper
         });
     }
     /**
-     * Switches all template types to their argument strategy
+     * @template T of Type
+     * @param T $type
+     * @return T
      */
     public static function toArgument(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type) : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type
     {
+        /** @var T */
         return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeTraverser::map($type, static function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type, callable $traverse) : Type {
             if ($type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType) {
                 return $traverse($type->toArgument());

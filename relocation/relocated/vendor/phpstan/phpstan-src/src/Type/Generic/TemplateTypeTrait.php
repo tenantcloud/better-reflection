@@ -10,12 +10,16 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\VerbosityLevel;
+/**
+ * @template TBound of Type
+ */
 trait TemplateTypeTrait
 {
     private string $name;
     private \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeScope $scope;
     private \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeStrategy $strategy;
     private \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeVariance $variance;
+    /** @var TBound */
     private \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $bound;
     public function getName() : string
     {
@@ -25,6 +29,7 @@ trait TemplateTypeTrait
     {
         return $this->scope;
     }
+    /** @return TBound */
     public function getBound() : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type
     {
         return $this->bound;
@@ -33,8 +38,10 @@ trait TemplateTypeTrait
     {
         $basicDescription = function () use($level) : string {
             if ($this->bound instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType) {
+                // @phpstan-ignore-line
                 $boundDescription = '';
             } else {
+                // @phpstan-ignore-line
                 $boundDescription = \sprintf(' of %s', $this->bound->describe($level));
             }
             return \sprintf('%s%s', $this->name, $boundDescription);
@@ -46,6 +53,10 @@ trait TemplateTypeTrait
     public function isArgument() : bool
     {
         return $this->strategy->isArgument();
+    }
+    public function toArgument() : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType
+    {
+        return new self($this->scope, new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeArgumentStrategy(), $this->variance, $this->name, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeHelper::toArgument($this->getBound()));
     }
     public function isValidVariance(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $a, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $b) : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
     {
@@ -84,6 +95,7 @@ trait TemplateTypeTrait
     }
     public function isSubTypeOf(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type) : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
     {
+        /** @var Type $bound */
         $bound = $this->getBound();
         if (!$type instanceof $bound && !$this instanceof $type && !$type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType && ($type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType || $type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntersectionType)) {
             return $type->isSuperTypeOf($this);
@@ -125,5 +137,13 @@ trait TemplateTypeTrait
     protected function shouldGeneralizeInferredType() : bool
     {
         return \true;
+    }
+    /**
+     * @param mixed[] $properties
+     * @return Type
+     */
+    public static function __set_state(array $properties) : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type
+    {
+        return new self($properties['scope'], $properties['strategy'], $properties['variance'], $properties['name'], $properties['bound']);
     }
 }

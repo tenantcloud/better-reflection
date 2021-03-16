@@ -21,7 +21,7 @@ class StringType
     {
         $valueType = new static();
         $result = \TenantCloud\BetterReflection\Relocated\Bug2612\TypeFactory::singleton($valueType);
-        \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\assertType('TenantCloud\\BetterReflection\\Relocated\\Bug2612\\StringType', $result);
+        \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\assertType('static(Bug2612\\StringType)', $result);
         return $result;
     }
 }

@@ -8,30 +8,27 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Traits\UndecidedComparis
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type;
 final class TemplateIntegerType extends \TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntegerType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType
 {
+    /** @use TemplateTypeTrait<IntegerType> */
     use TemplateTypeTrait;
     use UndecidedComparisonCompoundTypeTrait;
-    public function __construct(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeScope $scope, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeStrategy $templateTypeStrategy, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeVariance $templateTypeVariance, string $name)
+    public function __construct(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeScope $scope, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeStrategy $templateTypeStrategy, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeVariance $templateTypeVariance, string $name, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntegerType $bound)
     {
         $this->scope = $scope;
         $this->strategy = $templateTypeStrategy;
         $this->variance = $templateTypeVariance;
         $this->name = $name;
-        $this->bound = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntegerType();
+        $this->bound = $bound;
     }
-    public function toArgument() : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType
+    public function traverse(callable $cb) : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type
     {
-        return new self($this->scope, new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeArgumentStrategy(), $this->variance, $this->name);
+        $newBound = $cb($this->getBound());
+        if ($this->getBound() !== $newBound && $newBound instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntegerType) {
+            return new self($this->scope, $this->strategy, $this->variance, $this->name, $newBound);
+        }
+        return $this;
     }
     protected function shouldGeneralizeInferredType() : bool
     {
         return \false;
-    }
-    /**
-     * @param mixed[] $properties
-     * @return Type
-     */
-    public static function __set_state(array $properties) : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type
-    {
-        return new self($properties['scope'], $properties['strategy'], $properties['variance'], $properties['name']);
     }
 }

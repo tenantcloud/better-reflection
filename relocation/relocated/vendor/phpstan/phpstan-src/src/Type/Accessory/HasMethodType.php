@@ -7,6 +7,8 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessA
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Dummy\DummyMethodReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\TrivialParametersAcceptor;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\CallbackUnresolvedMethodPrototypeReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedMethodPrototypeReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\CompoundType;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntersectionType;
@@ -74,7 +76,14 @@ class HasMethodType implements \TenantCloud\BetterReflection\Relocated\PHPStan\T
     }
     public function getMethod(string $methodName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection
     {
-        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Dummy\DummyMethodReflection($this->methodName);
+        return $this->getUnresolvedMethodPrototype($methodName, $scope)->getTransformedMethod();
+    }
+    public function getUnresolvedMethodPrototype(string $methodName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedMethodPrototypeReflection
+    {
+        $method = new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Dummy\DummyMethodReflection($this->methodName);
+        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\CallbackUnresolvedMethodPrototypeReflection($method, $method->getDeclaringClass(), \false, static function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type) : Type {
+            return $type;
+        });
     }
     public function isCallable() : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
     {

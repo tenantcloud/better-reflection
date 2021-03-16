@@ -8,7 +8,10 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ConstantReflection
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\TrivialParametersAcceptor;
-use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\IntersectionTypeMethodReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\IntersectionTypeUnresolvedMethodPrototypeReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\IntersectionTypeUnresolvedPropertyPrototypeReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedMethodPrototypeReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedPropertyPrototypeReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Accessory\AccessoryNumericStringType;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Accessory\AccessoryType;
@@ -139,12 +142,25 @@ class IntersectionType implements \TenantCloud\BetterReflection\Relocated\PHPSta
     }
     public function getProperty(string $propertyName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection
     {
+        return $this->getUnresolvedPropertyPrototype($propertyName, $scope)->getTransformedProperty();
+    }
+    public function getUnresolvedPropertyPrototype(string $propertyName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedPropertyPrototypeReflection
+    {
+        $propertyPrototypes = [];
         foreach ($this->types as $type) {
-            if ($type->hasProperty($propertyName)->yes()) {
-                return $type->getProperty($propertyName, $scope);
+            if (!$type->hasProperty($propertyName)->yes()) {
+                continue;
             }
+            $propertyPrototypes[] = $type->getUnresolvedPropertyPrototype($propertyName, $scope)->withFechedOnType($this);
         }
-        throw new \TenantCloud\BetterReflection\Relocated\PHPStan\ShouldNotHappenException();
+        $propertiesCount = \count($propertyPrototypes);
+        if ($propertiesCount === 0) {
+            throw new \TenantCloud\BetterReflection\Relocated\PHPStan\ShouldNotHappenException();
+        }
+        if ($propertiesCount === 1) {
+            return $propertyPrototypes[0];
+        }
+        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\IntersectionTypeUnresolvedPropertyPrototypeReflection($propertyName, $propertyPrototypes);
     }
     public function canCallMethods() : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
     {
@@ -160,21 +176,25 @@ class IntersectionType implements \TenantCloud\BetterReflection\Relocated\PHPSta
     }
     public function getMethod(string $methodName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection
     {
-        $methods = [];
+        return $this->getUnresolvedMethodPrototype($methodName, $scope)->getTransformedMethod();
+    }
+    public function getUnresolvedMethodPrototype(string $methodName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedMethodPrototypeReflection
+    {
+        $methodPrototypes = [];
         foreach ($this->types as $type) {
             if (!$type->hasMethod($methodName)->yes()) {
                 continue;
             }
-            $methods[] = $type->getMethod($methodName, $scope);
+            $methodPrototypes[] = $type->getUnresolvedMethodPrototype($methodName, $scope)->withCalledOnType($this);
         }
-        $methodsCount = \count($methods);
+        $methodsCount = \count($methodPrototypes);
         if ($methodsCount === 0) {
             throw new \TenantCloud\BetterReflection\Relocated\PHPStan\ShouldNotHappenException();
         }
         if ($methodsCount === 1) {
-            return $methods[0];
+            return $methodPrototypes[0];
         }
-        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\IntersectionTypeMethodReflection($methodName, $methods);
+        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\IntersectionTypeUnresolvedMethodPrototypeReflection($methodName, $methodPrototypes);
     }
     public function canAccessConstants() : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
     {

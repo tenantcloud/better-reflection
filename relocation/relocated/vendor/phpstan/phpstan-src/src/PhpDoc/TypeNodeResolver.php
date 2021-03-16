@@ -126,13 +126,26 @@ class TypeNodeResolver
             case 'scalar':
                 return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType([new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntegerType(), new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\FloatType(), new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StringType(), new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\BooleanType()]);
             case 'number':
+                $type = $this->tryResolvePseudoTypeClassType($typeNode, $nameScope);
+                if ($type !== null) {
+                    return $type;
+                }
                 return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType([new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntegerType(), new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\FloatType()]);
             case 'numeric':
+                $type = $this->tryResolvePseudoTypeClassType($typeNode, $nameScope);
+                if ($type !== null) {
+                    return $type;
+                }
                 return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType([new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntegerType(), new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\FloatType(), new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntersectionType([new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StringType(), new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Accessory\AccessoryNumericStringType()])]);
             case 'numeric-string':
                 return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntersectionType([new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StringType(), new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Accessory\AccessoryNumericStringType()]);
             case 'bool':
+                return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\BooleanType();
             case 'boolean':
+                $type = $this->tryResolvePseudoTypeClassType($typeNode, $nameScope);
+                if ($type !== null) {
+                    return $type;
+                }
                 return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\BooleanType();
             case 'true':
                 return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Constant\ConstantBooleanType(\true);
@@ -141,7 +154,12 @@ class TypeNodeResolver
             case 'null':
                 return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\NullType();
             case 'float':
+                return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\FloatType();
             case 'double':
+                $type = $this->tryResolvePseudoTypeClassType($typeNode, $nameScope);
+                if ($type !== null) {
+                    return $type;
+                }
                 return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\FloatType();
             case 'array':
             case 'associative-array':
@@ -153,6 +171,10 @@ class TypeNodeResolver
             case 'callable':
                 return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\CallableType();
             case 'resource':
+                $type = $this->tryResolvePseudoTypeClassType($typeNode, $nameScope);
+                if ($type !== null) {
+                    return $type;
+                }
                 return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ResourceType();
             case 'mixed':
                 return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType(\true);
@@ -161,9 +183,15 @@ class TypeNodeResolver
             case 'object':
                 return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectWithoutClassType();
             case 'never':
+                $type = $this->tryResolvePseudoTypeClassType($typeNode, $nameScope);
+                if ($type !== null) {
+                    return $type;
+                }
+                return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\NeverType(\true);
             case 'never-return':
             case 'never-returns':
             case 'no-return':
+            case 'noreturn':
                 return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\NeverType(\true);
             case 'list':
                 return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ArrayType(new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntegerType(), new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType());
@@ -195,6 +223,20 @@ class TypeNodeResolver
             return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ErrorType();
         }
         return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($stringName);
+    }
+    private function tryResolvePseudoTypeClassType(\TenantCloud\BetterReflection\Relocated\PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode $typeNode, \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\NameScope $nameScope) : ?\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type
+    {
+        if ($nameScope->hasUseAlias($typeNode->name)) {
+            return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($nameScope->resolveStringName($typeNode->name));
+        }
+        if ($nameScope->getNamespace() === null) {
+            return null;
+        }
+        $className = $nameScope->resolveStringName($typeNode->name);
+        if ($this->getReflectionProvider()->hasClass($className)) {
+            return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($className);
+        }
+        return null;
     }
     private function resolveThisTypeNode(\TenantCloud\BetterReflection\Relocated\PHPStan\PhpDocParser\Ast\Type\ThisTypeNode $typeNode, \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\NameScope $nameScope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type
     {

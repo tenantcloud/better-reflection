@@ -7,6 +7,8 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessA
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ConstantReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedMethodPrototypeReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedPropertyPrototypeReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Traits\NonCallableTypeTrait;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Traits\NonGenericTypeTrait;
@@ -39,6 +41,10 @@ class NonexistentParentClassType implements \TenantCloud\BetterReflection\Reloca
     {
         throw new \TenantCloud\BetterReflection\Relocated\PHPStan\ShouldNotHappenException();
     }
+    public function getUnresolvedPropertyPrototype(string $propertyName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedPropertyPrototypeReflection
+    {
+        throw new \TenantCloud\BetterReflection\Relocated\PHPStan\ShouldNotHappenException();
+    }
     public function canCallMethods() : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
     {
         return \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic::createNo();
@@ -48,6 +54,10 @@ class NonexistentParentClassType implements \TenantCloud\BetterReflection\Reloca
         return \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic::createNo();
     }
     public function getMethod(string $methodName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection
+    {
+        throw new \TenantCloud\BetterReflection\Relocated\PHPStan\ShouldNotHappenException();
+    }
+    public function getUnresolvedMethodPrototype(string $methodName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedMethodPrototypeReflection
     {
         throw new \TenantCloud\BetterReflection\Relocated\PHPStan\ShouldNotHappenException();
     }

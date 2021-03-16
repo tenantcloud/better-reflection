@@ -8,7 +8,7 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeHelper;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type;
-class ResolvedPropertyReflection implements \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection
+class ResolvedPropertyReflection implements \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\WrapperPropertyReflection
 {
     private \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection $reflection;
     private \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap $templateTypeMap;
@@ -53,6 +53,7 @@ class ResolvedPropertyReflection implements \TenantCloud\BetterReflection\Reloca
             return $type;
         }
         $type = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeHelper::resolveTemplateTypes($this->reflection->getReadableType(), $this->templateTypeMap);
+        $type = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeHelper::resolveTemplateTypes($type, $this->templateTypeMap);
         $this->readableType = $type;
         return $type;
     }
@@ -63,6 +64,7 @@ class ResolvedPropertyReflection implements \TenantCloud\BetterReflection\Reloca
             return $type;
         }
         $type = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeHelper::resolveTemplateTypes($this->reflection->getWritableType(), $this->templateTypeMap);
+        $type = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeHelper::resolveTemplateTypes($type, $this->templateTypeMap);
         $this->writableType = $type;
         return $type;
     }

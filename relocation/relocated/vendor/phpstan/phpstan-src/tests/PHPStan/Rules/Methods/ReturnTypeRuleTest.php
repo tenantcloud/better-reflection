@@ -85,4 +85,20 @@ class ReturnTypeRuleTest extends \TenantCloud\BetterReflection\Relocated\PHPStan
     {
         $this->analyse([__DIR__ . '/data/bug-4605.php'], []);
     }
+    public function testReturnStatic() : void
+    {
+        $this->analyse([__DIR__ . '/data/return-static.php'], []);
+    }
+    public function testBug4648() : void
+    {
+        $this->analyse([__DIR__ . '/data/bug-4648.php'], []);
+    }
+    public function testBug3523() : void
+    {
+        $this->analyse([__DIR__ . '/data/bug-3523.php'], []);
+    }
+    public function testBug3120() : void
+    {
+        $this->analyse([__DIR__ . '/data/bug-3120.php'], []);
+    }
 }

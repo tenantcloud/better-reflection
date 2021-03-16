@@ -19,7 +19,7 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypehintHelper;
 class Php8SignatureMapProvider implements \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\SignatureMap\SignatureMapProvider
 {
-    private const DIRECTORY = __DIR__ . '/../../../vendor/phpstan/php-8-stubs';
+    private const DIRECTORY = __DIR__ . '/../../../../../phpstan/php-8-stubs';
     private \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\SignatureMap\FunctionSignatureMapProvider $functionSignatureMapProvider;
     private \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\BetterReflection\SourceLocator\FileNodesFetcher $fileNodesFetcher;
     private \TenantCloud\BetterReflection\Relocated\PHPStan\Type\FileTypeMapper $fileTypeMapper;

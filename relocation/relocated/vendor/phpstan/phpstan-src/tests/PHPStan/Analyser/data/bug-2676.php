@@ -31,7 +31,8 @@ class Wallet
 function (\TenantCloud\BetterReflection\Relocated\Bug2676\Wallet $wallet) : void {
     $bankAccounts = $wallet->getBankAccountList();
     \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\assertType('DoctrineIntersectionTypeIsSupertypeOf\\Collection&iterable<Bug2676\\BankAccount>', $bankAccounts);
-    foreach ($bankAccounts as $bankAccount) {
+    foreach ($bankAccounts as $key => $bankAccount) {
+        \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\assertType('(int|string)', $key);
         \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\assertType('TenantCloud\\BetterReflection\\Relocated\\Bug2676\\BankAccount', $bankAccount);
     }
 };

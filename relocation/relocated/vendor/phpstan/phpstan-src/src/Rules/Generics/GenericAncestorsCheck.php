@@ -53,7 +53,7 @@ class GenericAncestorsCheck
             $genericObjectTypeCheckMessages = $this->genericObjectTypeCheck->check($ancestorType, $classNotGenericMessage, $notEnoughTypesMessage, $extraTypesMessage, $typeIsNotSubtypeMessage);
             $messages = \array_merge($messages, $genericObjectTypeCheckMessages);
             foreach ($ancestorType->getReferencedClasses() as $referencedClass) {
-                if ($this->reflectionProvider->hasClass($referencedClass) && !$this->reflectionProvider->getClass($referencedClass)->isTrait()) {
+                if ($this->reflectionProvider->hasClass($referencedClass)) {
                     continue;
                 }
                 $messages[] = \TenantCloud\BetterReflection\Relocated\PHPStan\Rules\RuleErrorBuilder::message(\sprintf($invalidTypeMessage, $referencedClass))->build();

@@ -4,8 +4,8 @@ namespace Tests\TenantCloud\BetterReflection\PHPStan;
 
 use Ds\Pair;
 use Ds\Sequence;
-use Ds\Vector;
 use PHPUnit\Framework\TestCase;
+use Stringable;
 use TenantCloud\BetterReflection\DefaultReflectorBuilder;
 use TenantCloud\BetterReflection\Projection\MethodReflectionProjection;
 use TenantCloud\BetterReflection\Projection\ProjectionReflector;
@@ -158,17 +158,11 @@ class DefaultReflectorTest extends TestCase
 		$uses = $reflection->uses();
 		self::assertCount(1, $uses);
 //		self::assertEquals(
-//			new Vector([
-//				new GenericObjectType(ParentTraitStub::class, [
-//					new TemplateMixedType(
-//						$templateTypeScope,
-//						new TemplateTypeParameterStrategy(),
-//						TemplateTypeVariance::createInvariant(),
-//						'T',
-//					),
-//				]),
+//			new GenericObjectType(ParentTraitStub::class, [
+//				$tType,
+//				new ObjectType(SomeStub::class),
 //			]),
-//			$implements
+//			$uses[0],
 //		);
 
 		/** @var Sequence|PropertyReflectionProjection[] $properties */
@@ -298,5 +292,12 @@ class DefaultReflectorTest extends TestCase
 		self::assertEmpty($parameters[0]->attributes());
 		self::assertEquals($kTypeParam, $parameters[0]->type());
 		self::assertEquals($kValueTypeParam, $secondMethod->returnType());
+	}
+
+	public function testBuiltIn(): void
+	{
+		$reflection = $this->reflector->forClass(Stringable::class);
+
+		self::assertSame(Stringable::class, $reflection->qualifiedName());
 	}
 }

@@ -346,7 +346,11 @@ class NodeScopeResolver
                 $classReflection = $scope->getClassReflection();
                 $phpDocReturnType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeTraverser::map($phpDocReturnType, static function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type, callable $traverse) use($classReflection) : Type {
                     if ($type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType) {
-                        return $traverse($type->changeBaseClass($classReflection));
+                        $changedType = $type->changeBaseClass($classReflection);
+                        if ($classReflection->isFinal()) {
+                            $changedType = $changedType->getStaticObjectType();
+                        }
+                        return $traverse($changedType);
                     }
                     return $traverse($type);
                 });
@@ -1111,7 +1115,7 @@ class NodeScopeResolver
                     $methodCalledOnType = $scope->getType($expr->var);
                 } else {
                     if ($expr->class instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Name) {
-                        $methodCalledOnType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($scope->resolveName($expr->class));
+                        $methodCalledOnType = $scope->resolveTypeByName($expr->class);
                     } else {
                         $methodCalledOnType = $scope->getType($expr->class);
                     }
@@ -2107,7 +2111,7 @@ class NodeScopeResolver
             }
         } elseif ($var instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr\StaticPropertyFetch) {
             if ($var->class instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Name) {
-                $propertyHolderType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($scope->resolveName($var->class));
+                $propertyHolderType = $scope->resolveTypeByName($var->class);
             } else {
                 $this->processExprNode($var->class, $scope, $nodeCallback, $context);
                 $propertyHolderType = $scope->getType($var->class);

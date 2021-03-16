@@ -96,7 +96,7 @@ class TypeSpecifier
                 if ($lowercasedClassName === 'self' && $scope->isInClass()) {
                     $type = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($scope->getClassReflection()->getName());
                 } elseif ($lowercasedClassName === 'static' && $scope->isInClass()) {
-                    $type = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType($scope->getClassReflection()->getName());
+                    $type = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType($scope->getClassReflection());
                 } elseif ($lowercasedClassName === 'parent') {
                     if ($scope->isInClass() && $scope->getClassReflection()->getParentClass() !== \false) {
                         $type = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($scope->getClassReflection()->getParentClass()->getName());
@@ -327,7 +327,7 @@ class TypeSpecifier
             }
         } elseif ($expr instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr\StaticCall && $expr->name instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Identifier) {
             if ($expr->class instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Name) {
-                $calleeType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($scope->resolveName($expr->class));
+                $calleeType = $scope->resolveTypeByName($expr->class);
             } else {
                 $calleeType = $scope->getType($expr->class);
             }

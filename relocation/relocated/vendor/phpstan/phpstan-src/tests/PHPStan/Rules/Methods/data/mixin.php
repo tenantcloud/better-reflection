@@ -29,7 +29,7 @@ function (\TenantCloud\BetterReflection\Relocated\MixinMethods\Baz $baz) : void 
     $baz->doFoo(1);
 };
 /**
- * @template T
+ * @template T of object
  * @mixin T
  */
 class GenericFoo

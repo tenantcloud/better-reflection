@@ -1406,12 +1406,12 @@
             "source": {
                 "type": "git",
                 "url": "https:\/\/github.com\/JetBrains\/phpstorm-stubs.git",
-                "reference": "39476b4f910c5678d50e911502e3e5a4ef10faeb"
+                "reference": "5a30114d91f6fc80eb423be363631ed901d602a3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https:\/\/api.github.com\/repos\/JetBrains\/phpstorm-stubs\/zipball\/39476b4f910c5678d50e911502e3e5a4ef10faeb",
-                "reference": "39476b4f910c5678d50e911502e3e5a4ef10faeb",
+                "url": "https:\/\/api.github.com\/repos\/JetBrains\/phpstorm-stubs\/zipball\/5a30114d91f6fc80eb423be363631ed901d602a3",
+                "reference": "5a30114d91f6fc80eb423be363631ed901d602a3",
                 "shasum": ""
             },
             "require-dev": {
@@ -1421,7 +1421,7 @@
                 "phpdocumentor\/reflection-docblock": "@stable",
                 "phpunit\/phpunit": "@stable"
             },
-            "time": "2021-03-06T16:59:21+00:00",
+            "time": "2021-03-15T16:12:47+00:00",
             "default-branch": true,
             "type": "library",
             "installation-source": "source",
@@ -1758,12 +1758,12 @@
             "source": {
                 "type": "git",
                 "url": "https:\/\/github.com\/nette\/php-generator.git",
-                "reference": "dc911063ca4b6cf8a8e4e23d4ff492c081912e5f"
+                "reference": "2ea0c5fe5f2b4031aef684c259dd437e0ddd6912"
             },
             "dist": {
                 "type": "zip",
-                "url": "https:\/\/api.github.com\/repos\/nette\/php-generator\/zipball\/dc911063ca4b6cf8a8e4e23d4ff492c081912e5f",
-                "reference": "dc911063ca4b6cf8a8e4e23d4ff492c081912e5f",
+                "url": "https:\/\/api.github.com\/repos\/nette\/php-generator\/zipball\/2ea0c5fe5f2b4031aef684c259dd437e0ddd6912",
+                "reference": "2ea0c5fe5f2b4031aef684c259dd437e0ddd6912",
                 "shasum": ""
             },
             "require": {
@@ -1779,7 +1779,7 @@
             "suggest": {
                 "nikic\/php-parser": "to use ClassType::withBodiesFrom() & GlobalFunction::withBodyFrom()"
             },
-            "time": "2021-03-04T17:44:17+00:00",
+            "time": "2021-03-11T20:54:24+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -2467,12 +2467,12 @@
             "source": {
                 "type": "git",
                 "url": "https:\/\/github.com\/phpstan\/phpdoc-parser.git",
-                "reference": "2e17e4a90702d8b7ead58f4e08478a8e819ba6b8"
+                "reference": "b451b2f27a97c8c288de63db79c2a843727d4326"
             },
             "dist": {
                 "type": "zip",
-                "url": "https:\/\/api.github.com\/repos\/phpstan\/phpdoc-parser\/zipball\/2e17e4a90702d8b7ead58f4e08478a8e819ba6b8",
-                "reference": "2e17e4a90702d8b7ead58f4e08478a8e819ba6b8",
+                "url": "https:\/\/api.github.com\/repos\/phpstan\/phpdoc-parser\/zipball\/b451b2f27a97c8c288de63db79c2a843727d4326",
+                "reference": "b451b2f27a97c8c288de63db79c2a843727d4326",
                 "shasum": ""
             },
             "require": {
@@ -2487,7 +2487,7 @@
                 "phpunit\/phpunit": "^7.5.20",
                 "symfony\/process": "^5.2"
             },
-            "time": "2021-02-28T14:30:10+00:00",
+            "time": "2021-03-15T08:55:35+00:00",
             "default-branch": true,
             "type": "library",
             "extra": {
@@ -2510,7 +2510,7 @@
             "description": "PHPDoc parser with support for nullable, intersection and generic types",
             "support": {
                 "issues": "https:\/\/github.com\/phpstan\/phpdoc-parser\/issues",
-                "source": "https:\/\/github.com\/phpstan\/phpdoc-parser\/tree\/0.4.12"
+                "source": "https:\/\/github.com\/phpstan\/phpdoc-parser\/tree\/master"
             },
             "install-path": "..\/phpstan\/phpdoc-parser"
         },
@@ -2521,7 +2521,7 @@
             "source": {
                 "type": "git",
                 "url": "https:\/\/github.com\/phpstan\/phpstan-src",
-                "reference": "0725f5a71113e399e077bf9ae038467e69c1e0bc"
+                "reference": "5b2601e89014dabb51cb2616af0ad54eb008eaf3"
             },
             "require": {
                 "clue\/block-react": "^1.4",
@@ -2574,7 +2574,7 @@
                 "slevomat\/coding-standard": "^6.4",
                 "squizlabs\/php_codesniffer": "^3.5"
             },
-            "time": "2021-03-08T07:31:25+00:00",
+            "time": "2021-03-15T17:48:37+00:00",
             "default-branch": true,
             "bin": [
                 "bin\/phpstan"
@@ -3604,12 +3604,12 @@
             "source": {
                 "type": "git",
                 "url": "https:\/\/github.com\/symfony\/console.git",
-                "reference": "701ae4a4663cd0ebe696269f1dcd807c0deffbf3"
+                "reference": "3c65c2dda22b7794dde8dd5e0c2f7b5542ae0d2c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https:\/\/api.github.com\/repos\/symfony\/console\/zipball\/701ae4a4663cd0ebe696269f1dcd807c0deffbf3",
-                "reference": "701ae4a4663cd0ebe696269f1dcd807c0deffbf3",
+                "url": "https:\/\/api.github.com\/repos\/symfony\/console\/zipball\/3c65c2dda22b7794dde8dd5e0c2f7b5542ae0d2c",
+                "reference": "3c65c2dda22b7794dde8dd5e0c2f7b5542ae0d2c",
                 "shasum": ""
             },
             "require": {
@@ -3643,7 +3643,7 @@
                 "symfony\/lock": "",
                 "symfony\/process": ""
             },
-            "time": "2021-03-06T13:09:26+00:00",
+            "time": "2021-03-11T15:23:19+00:00",
             "type": "library",
             "installation-source": "source",
             "autoload": {
@@ -4161,12 +4161,12 @@
             "source": {
                 "type": "git",
                 "url": "https:\/\/github.com\/webmozarts\/assert.git",
-                "reference": "5c629e31c50067862986130869a8ab78dd3d9597"
+                "reference": "f07851c5b43e4cb502c24068620e9af6cbdd953f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https:\/\/api.github.com\/repos\/webmozarts\/assert\/zipball\/5c629e31c50067862986130869a8ab78dd3d9597",
-                "reference": "5c629e31c50067862986130869a8ab78dd3d9597",
+                "url": "https:\/\/api.github.com\/repos\/webmozarts\/assert\/zipball\/f07851c5b43e4cb502c24068620e9af6cbdd953f",
+                "reference": "f07851c5b43e4cb502c24068620e9af6cbdd953f",
                 "shasum": ""
             },
             "require": {
@@ -4180,7 +4180,7 @@
             "require-dev": {
                 "phpunit\/phpunit": "^8.5.13"
             },
-            "time": "2021-03-07T09:13:27+00:00",
+            "time": "2021-03-11T07:08:13+00:00",
             "default-branch": true,
             "type": "library",
             "extra": {

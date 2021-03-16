@@ -114,4 +114,10 @@ class MethodSignatureRuleTest extends \TenantCloud\BetterReflection\Relocated\PH
         $this->reportStatic = \true;
         $this->analyse([__DIR__ . '/data/bug-4084.php'], []);
     }
+    public function testBug3523() : void
+    {
+        $this->reportMaybes = \true;
+        $this->reportStatic = \true;
+        $this->analyse([__DIR__ . '/data/bug-3523.php'], [['Return type (Bug3523\\Baz) of method Bug3523\\Baz::deserialize() should be covariant with return type (static(Bug3523\\FooInterface)) of method Bug3523\\FooInterface::deserialize()', 40]]);
+    }
 }

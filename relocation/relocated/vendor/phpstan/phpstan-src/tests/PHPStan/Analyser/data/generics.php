@@ -851,8 +851,8 @@ class CreateClassReflectionOfStaticClass
     public function doFoo()
     {
         \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\assertType('TenantCloud\\BetterReflection\\Relocated\\PHPStan\\Generics\\FunctionsAssertType\\CreateClassReflectionOfStaticClass', (new \ReflectionClass(self::class))->newInstanceWithoutConstructor());
-        \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\assertType('TenantCloud\\BetterReflection\\Relocated\\PHPStan\\Generics\\FunctionsAssertType\\CreateClassReflectionOfStaticClass', (new \ReflectionClass(static::class))->newInstanceWithoutConstructor());
-        \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\assertType('class-string<PHPStan\\Generics\\FunctionsAssertType\\CreateClassReflectionOfStaticClass>', (new \ReflectionClass(static::class))->name);
+        \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\assertType('static(PHPStan\\Generics\\FunctionsAssertType\\CreateClassReflectionOfStaticClass)', (new \ReflectionClass(static::class))->newInstanceWithoutConstructor());
+        \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\assertType('class-string<static(PHPStan\\Generics\\FunctionsAssertType\\CreateClassReflectionOfStaticClass)>', (new \ReflectionClass(static::class))->name);
     }
 }
 /**

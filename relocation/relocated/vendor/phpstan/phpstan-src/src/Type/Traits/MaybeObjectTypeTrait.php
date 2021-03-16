@@ -10,7 +10,12 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Dummy\DummyMethodR
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Dummy\DummyPropertyReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\CallbackUnresolvedMethodPrototypeReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\CallbackUnresolvedPropertyPrototypeReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedMethodPrototypeReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedPropertyPrototypeReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type;
 trait MaybeObjectTypeTrait
 {
     public function canAccessProperties() : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
@@ -23,7 +28,14 @@ trait MaybeObjectTypeTrait
     }
     public function getProperty(string $propertyName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection
     {
-        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Dummy\DummyPropertyReflection();
+        return $this->getUnresolvedPropertyPrototype($propertyName, $scope)->getTransformedProperty();
+    }
+    public function getUnresolvedPropertyPrototype(string $propertyName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedPropertyPrototypeReflection
+    {
+        $property = new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Dummy\DummyPropertyReflection();
+        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\CallbackUnresolvedPropertyPrototypeReflection($property, $property->getDeclaringClass(), \false, static function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type) : Type {
+            return $type;
+        });
     }
     public function canCallMethods() : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
     {
@@ -35,7 +47,14 @@ trait MaybeObjectTypeTrait
     }
     public function getMethod(string $methodName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection
     {
-        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Dummy\DummyMethodReflection($methodName);
+        return $this->getUnresolvedMethodPrototype($methodName, $scope)->getTransformedMethod();
+    }
+    public function getUnresolvedMethodPrototype(string $methodName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedMethodPrototypeReflection
+    {
+        $method = new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Dummy\DummyMethodReflection($methodName);
+        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\CallbackUnresolvedMethodPrototypeReflection($method, $method->getDeclaringClass(), \false, static function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type) : Type {
+            return $type;
+        });
     }
     public function canAccessConstants() : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
     {

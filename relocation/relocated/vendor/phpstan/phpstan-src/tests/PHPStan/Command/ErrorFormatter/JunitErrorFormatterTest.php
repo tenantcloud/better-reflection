@@ -99,7 +99,7 @@ class JunitErrorFormatterTest extends \TenantCloud\BetterReflection\Relocated\PH
         $this->assertSame($exitCode, $this->formatter->formatErrors($this->getAnalysisResult($numFileErrors, $numGeneralErrors), $this->getOutput()), 'Response code do not match');
         $xml = new \DOMDocument();
         $xml->loadXML($this->getOutputContent());
-        $this->assertTrue($xml->schemaValidate('https://raw.githubusercontent.com/junit-team/junit5/r5.5.1/platform-tests/src/test/resources/jenkins-junit.xsd'), 'Schema do not validate');
+        $this->assertTrue($xml->schemaValidate(__DIR__ . '/junit-schema.xsd'), 'Schema do not validate');
         $this->assertXmlStringEqualsXmlString($expected, $this->getOutputContent(), 'XML do not match');
     }
 }

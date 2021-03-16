@@ -9,7 +9,7 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\File\FileReader;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Php8StubsMap;
 class Php8StubsSourceStubber implements \TenantCloud\BetterReflection\Relocated\PHPStan\BetterReflection\SourceLocator\SourceStubber\SourceStubber
 {
-    private const DIRECTORY = __DIR__ . '/../../../../vendor/phpstan/php-8-stubs';
+    private const DIRECTORY = __DIR__ . '/../../../../../../phpstan/php-8-stubs';
     public function hasClass(string $className) : bool
     {
         $className = \strtolower($className);

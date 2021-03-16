@@ -8,15 +8,16 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type;
 final class TemplateMixedType extends \TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType
 {
+    /** @use TemplateTypeTrait<MixedType> */
     use TemplateTypeTrait;
-    public function __construct(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeScope $scope, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeStrategy $templateTypeStrategy, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeVariance $templateTypeVariance, string $name)
+    public function __construct(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeScope $scope, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeStrategy $templateTypeStrategy, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeVariance $templateTypeVariance, string $name, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType $bound)
     {
         parent::__construct(\true);
         $this->scope = $scope;
         $this->strategy = $templateTypeStrategy;
         $this->variance = $templateTypeVariance;
         $this->name = $name;
-        $this->bound = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType(\true);
+        $this->bound = $bound;
     }
     public function isSuperTypeOfMixed(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType $type) : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
     {
@@ -30,16 +31,12 @@ final class TemplateMixedType extends \TenantCloud\BetterReflection\Relocated\PH
         }
         return \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic::createYes();
     }
-    public function toArgument() : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType
+    public function traverse(callable $cb) : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type
     {
-        return new self($this->scope, new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeArgumentStrategy(), $this->variance, $this->name);
-    }
-    /**
-     * @param mixed[] $properties
-     * @return Type
-     */
-    public static function __set_state(array $properties) : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type
-    {
-        return new self($properties['scope'], $properties['strategy'], $properties['variance'], $properties['name']);
+        $newBound = $cb($this->getBound());
+        if ($this->getBound() !== $newBound && $newBound instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType) {
+            return new self($this->scope, $this->strategy, $this->variance, $this->name, $newBound);
+        }
+        return $this;
     }
 }

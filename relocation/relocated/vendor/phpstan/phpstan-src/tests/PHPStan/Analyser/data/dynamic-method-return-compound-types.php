@@ -2,11 +2,9 @@
 
 namespace TenantCloud\BetterReflection\Relocated\DynamicMethodReturnCompoundTypes;
 
-class Collection
+interface Collection extends \Traversable
 {
-    public function getSelf()
-    {
-    }
+    public function getSelf();
 }
 class Foo
 {

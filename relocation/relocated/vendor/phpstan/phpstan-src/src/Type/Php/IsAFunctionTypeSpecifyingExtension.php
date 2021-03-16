@@ -19,7 +19,6 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\Type\FunctionTypeSpecifyingEx
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\GenericClassStringType;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectWithoutClassType;
-use TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType;
 class IsAFunctionTypeSpecifyingExtension implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type\FunctionTypeSpecifyingExtension, \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\TypeSpecifierAwareExtension
 {
     private \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\TypeSpecifier $typeSpecifier;
@@ -35,12 +34,7 @@ class IsAFunctionTypeSpecifyingExtension implements \TenantCloud\BetterReflectio
         $classNameArgExpr = $node->args[1]->value;
         $classNameArgExprType = $scope->getType($classNameArgExpr);
         if ($classNameArgExpr instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr\ClassConstFetch && $classNameArgExpr->class instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Name && $classNameArgExpr->name instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Identifier && \strtolower($classNameArgExpr->name->name) === 'class') {
-            $className = $scope->resolveName($classNameArgExpr->class);
-            if (\strtolower($classNameArgExpr->class->toString()) === 'static') {
-                $objectType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType($className);
-            } else {
-                $objectType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($className);
-            }
+            $objectType = $scope->resolveTypeByName($classNameArgExpr->class);
             $types = $this->typeSpecifier->create($node->args[0]->value, $objectType, $context);
         } elseif ($classNameArgExprType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Constant\ConstantStringType) {
             $objectType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($classNameArgExprType->getValue());

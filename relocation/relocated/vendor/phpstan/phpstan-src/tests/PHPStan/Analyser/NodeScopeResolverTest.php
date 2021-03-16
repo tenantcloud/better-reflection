@@ -1195,6 +1195,59 @@ class NodeScopeResolverTest extends \TenantCloud\BetterReflection\Relocated\PHPS
     {
         return [['1', '$integers[0]'], ['array(string, string, string)', '$mappedStrings'], ['string', '$mappedStrings[0]'], ['1|2|3', '$filteredIntegers[0]'], ['123', '$filteredMixed[0]'], ['1|2|3', '$uniquedIntegers[1]'], ['string', '$reducedIntegersToString'], ['string|null', '$reducedIntegersToStringWithNull'], ['string', '$reducedIntegersToStringAnother'], ['null', '$reducedToNull'], ['1|string', '$reducedIntegersToStringWithInt'], ['1', '$reducedToInt'], ['array<0|1|2, 1|2|3>', 'array_change_key_case($integers)'], [\PHP_VERSION_ID < 80000 ? 'array|false' : 'array', 'array_combine($array, $array2)'], ['array(1 => 2)', 'array_combine([1], [2])'], ['false', 'array_combine([1, 2], [3])'], ['array(\'a\' => \'d\', \'b\' => \'e\', \'c\' => \'f\')', 'array_combine([\'a\', \'b\', \'c\'], [\'d\', \'e\', \'f\'])'], [\PHP_VERSION_ID < 80000 ? 'array<1|2|3, mixed>|false' : 'array<1|2|3, mixed>', 'array_combine([1, 2, 3], $array)'], [\PHP_VERSION_ID < 80000 ? 'array<1|2|3>|false' : 'array<1|2|3>', 'array_combine($array, [1, 2, 3])'], ['array', 'array_combine($array, $array)'], ['array<string, string>', 'array_combine($stringArray, $stringArray)'], ['array<0|1|2, 1|2|3>', 'array_diff_assoc($integers, [])'], ['array<0|1|2, 1|2|3>', 'array_diff_key($integers, [])'], ['array<0|1|2, 1|2|3>', 'array_diff_uassoc($integers, [])'], ['array<0|1|2, 1|2|3>', 'array_diff_ukey($integers, [])'], ['array<0|1|2, 1|2|3>', 'array_diff($integers, [])'], ['array<0|1|2, 1|2|3>', 'array_udiff_assoc($integers, [])'], ['array<0|1|2, 1|2|3>', 'array_udiff_uassoc($integers, [])'], ['array<0|1|2, 1|2|3>', 'array_udiff($integers, [])'], ['array<0|1|2, 1|2|3>', 'array_intersect_assoc($integers, [])'], ['array<0|1|2, 1|2|3>', 'array_intersect_key($integers, [])'], ['array<int, int>', 'array_intersect_key(...[$integers, [4, 5, 6]])'], ['array<int>', 'array_intersect_key(...$generalIntegersInAnotherArray, [])'], ['array<0|1|2, 1|2|3>', 'array_intersect_uassoc($integers, [])'], ['array<0|1|2, 1|2|3>', 'array_intersect_ukey($integers, [])'], ['array<0|1|2, 1|2|3>', 'array_intersect($integers, [])'], ['array<0|1|2, 1|2|3>', 'array_uintersect_assoc($integers, [])'], ['array<0|1|2, 1|2|3>', 'array_uintersect_uassoc($integers, [])'], ['array<0|1|2, 1|2|3>', 'array_uintersect($integers, [])'], ['array(1, 1, 1, 1, 1)', '$filledIntegers'], ['array(1)', '$filledIntegersWithKeys'], ['array(1, 2)', 'array_keys($integerKeys)'], ['array(\'foo\', \'bar\')', 'array_keys($stringKeys)'], ['array(\'foo\', 1)', 'array_keys($stringOrIntegerKeys)'], ['array<int, string>', 'array_keys($generalStringKeys)'], ['array(\'foo\', stdClass)', 'array_values($integerKeys)'], ['array<int, int>', 'array_values($generalStringKeys)'], ['array<int|string, stdClass>', 'array_merge($stringOrIntegerKeys)'], ['array<int|string, DateTimeImmutable|int>', 'array_merge($generalStringKeys, $generalDateTimeValues)'], ['array<int|string, int|stdClass>', 'array_merge($generalStringKeys, $stringOrIntegerKeys)'], ['array<int|string, int|stdClass>', 'array_merge($stringOrIntegerKeys, $generalStringKeys)'], ['array<int|string, \'foo\'|stdClass>', 'array_merge($stringKeys, $stringOrIntegerKeys)'], ['array<int|string, \'foo\'|stdClass>', 'array_merge($stringOrIntegerKeys, $stringKeys)'], ['array<int|string, 2|4|\'a\'|\'b\'|\'green\'|\'red\'|\'trapezoid\'>', 'array_merge(array("color" => "red", 2, 4), array("a", "b", "color" => "green", "shape" => "trapezoid", 4))'], ['array<int|string, DateTimeImmutable|int>', 'array_merge(...[$generalStringKeys, $generalDateTimeValues])'], ['array<int>', '$mergedInts'], ['array(5 => \'banana\', 6 => \'banana\', 7 => \'banana\', 8 => \'banana\', 9 => \'banana\', 10 => \'banana\')', 'array_fill(5, 6, \'banana\')'], ['array<int, \'apple\'>&nonEmpty', 'array_fill(0, 101, \'apple\')'], ['array(-2 => \'pear\', 0 => \'pear\', 1 => \'pear\', 2 => \'pear\')', 'array_fill(-2, 4, \'pear\')'], ['array<int, stdClass>&nonEmpty', 'array_fill($integer, 2, new \\stdClass())'], ['array<int, stdClass>', 'array_fill(2, $integer, new \\stdClass())'], ['array<int, stdClass>', 'array_fill_keys($generalStringKeys, new \\stdClass())'], ['array(\'foo\' => \'banana\', 5 => \'banana\', 10 => \'banana\', \'bar\' => \'banana\')', 'array_fill_keys([\'foo\', 5, 10, \'bar\'], \'banana\')'], ['array<string, stdClass>', '$mappedStringKeys'], ['array<string, mixed>', '$mappedStringKeysWithUnknownClosureType'], ['array<string>', '$mappedWrongArray'], ['array', '$unknownArray'], ['array(\'foo\' => \'banana\', \'bar\' => \'banana\', ?\'baz\' => \'banana\', ?\'lorem\' => \'banana\')', 'array_fill_keys($conditionalArray, \'banana\')'], ['array(\'foo\' => stdClass, \'bar\' => stdClass, ?\'baz\' => stdClass, ?\'lorem\' => stdClass)', 'array_map(function (): \\stdClass {}, $conditionalKeysArray)'], ['stdClass', 'array_pop($stringKeys)'], ['array<stdClass>&hasOffset(\'baz\')', '$stdClassesWithIsset'], ['stdClass', 'array_pop($stdClassesWithIsset)'], ['\'foo\'', 'array_shift($stringKeys)'], ['int|null', 'array_pop($generalStringKeys)'], ['int|null', 'array_shift($generalStringKeys)'], ['null', 'array_pop([])'], ['null', 'array_shift([])'], ['array(null, \'\', 1)', '$constantArrayWithFalseyValues'], ['array(2 => 1)', '$constantTruthyValues'], ['array<int, false|null>', '$falsey'], ['array()', 'array_filter($falsey)'], ['array<int, bool|null>', '$withFalsey'], ['array<int, true>', 'array_filter($withFalsey)'], ['array(\'a\' => 1)', 'array_filter($union)'], ['array(?0 => true, ?1 => int<min, -1>|int<1, max>)', 'array_filter($withPossiblyFalsey)'], ['(array|null)', 'array_filter($mixed)'], ['1|\'foo\'|false', 'array_search(new stdClass, $stringOrIntegerKeys, true)'], ['\'foo\'', 'array_search(\'foo\', $stringKeys, true)'], ['int|false', 'array_search(new DateTimeImmutable(), $generalDateTimeValues, true)'], ['string|false', 'array_search(9, $generalStringKeys, true)'], ['string|false', 'array_search(9, $generalStringKeys, false)'], ['string|false', 'array_search(9, $generalStringKeys)'], ['null', 'array_search(999, $integer, true)'], ['false', 'array_search(new stdClass, $generalStringKeys, true)'], ['int|string|false', 'array_search($mixed, $array, true)'], ['int|string|false', 'array_search($mixed, $array, false)'], ['\'a\'|\'b\'|false', 'array_search($string, [\'a\' => \'A\', \'b\' => \'B\'], true)'], ['false', 'array_search($integer, [\'a\' => \'A\', \'b\' => \'B\'], true)'], ['\'foo\'|false', 'array_search($generalIntegerOrString, $stringKeys, true)'], ['int|false', 'array_search($generalIntegerOrString, $generalArrayOfIntegersOrStrings, true)'], ['int|false', 'array_search($generalIntegerOrString, $clonedConditionalArray, true)'], ['int|string|false', 'array_search($generalIntegerOrString, $generalIntegerOrStringKeys, false)'], ['false', 'array_search(\'id\', $generalIntegerOrStringKeys, true)'], ['int|string|false', 'array_search(\'id\', $generalIntegerOrStringKeysMixedValues, true)'], ['int|string|false|null', 'array_search(\'id\', doFoo() ? $generalIntegerOrStringKeys : false, true)'], ['false|null', 'array_search(\'id\', doFoo() ? [] : false, true)'], ['null', 'array_search(\'id\', false, true)'], ['null', 'array_search(\'id\', false)'], ['int|string|false', 'array_search(\'id\', $thisDoesNotExistAndIsMixed, true)'], ['int|string|false', 'array_search(\'id\', doFoo() ? $thisDoesNotExistAndIsMixedInUnion : false, true)'], ['int|string|false', 'array_search(1, $generalIntegers, true)'], ['int|string|false', 'array_search(1, $generalIntegers, false)'], ['int|string|false', 'array_search(1, $generalIntegers)'], ['array<string, int>', 'array_slice($generalStringKeys, 0)'], ['array<string, int>', 'array_slice($generalStringKeys, 1)'], ['array<string, int>', 'array_slice($generalStringKeys, 1, null, true)'], ['array<string, int>', 'array_slice($generalStringKeys, 1, 2)'], ['array<string, int>', 'array_slice($generalStringKeys, 1, 2, true)'], ['array<string, int>', 'array_slice($generalStringKeys, 1, -1)'], ['array<string, int>', 'array_slice($generalStringKeys, 1, -1, true)'], ['array<string, int>', 'array_slice($generalStringKeys, -2)'], ['array<string, int>', 'array_slice($generalStringKeys, -2, 1, true)'], ['array', 'array_slice($unknownArray, 0)'], ['array', 'array_slice($unknownArray, 1)'], ['array', 'array_slice($unknownArray, 1, null, true)'], ['array', 'array_slice($unknownArray, 1, 2)'], ['array', 'array_slice($unknownArray, 1, 2, true)'], ['array', 'array_slice($unknownArray, 1, -1)'], ['array', 'array_slice($unknownArray, 1, -1, true)'], ['array', 'array_slice($unknownArray, -2)'], ['array', 'array_slice($unknownArray, -2, 1, true)'], ['array(0 => bool, 1 => int, 2 => \'\', \'a\' => 0)', 'array_slice($withPossiblyFalsey, 0)'], ['array(0 => int, 1 => \'\', \'a\' => 0)', 'array_slice($withPossiblyFalsey, 1)'], ['array(1 => int, 2 => \'\', \'a\' => 0)', 'array_slice($withPossiblyFalsey, 1, null, true)'], ['array(0 => \'\', \'a\' => 0)', 'array_slice($withPossiblyFalsey, 2, 3)'], ['array(2 => \'\', \'a\' => 0)', 'array_slice($withPossiblyFalsey, 2, 3, true)'], ['array(int, \'\')', 'array_slice($withPossiblyFalsey, 1, -1)'], ['array(1 => int, 2 => \'\')', 'array_slice($withPossiblyFalsey, 1, -1, true)'], ['array(0 => \'\', \'a\' => 0)', 'array_slice($withPossiblyFalsey, -2, null)'], ['array(2 => \'\', \'a\' => 0)', 'array_slice($withPossiblyFalsey, -2, null, true)'], ['array(\'baz\' => \'qux\')|array(0 => \'\', \'a\' => 0)', 'array_slice($unionArrays, 1)'], ['array(\'a\' => 0)|array(\'baz\' => \'qux\')', 'array_slice($unionArrays, -1, null, true)'], ['array(0 => \'foo\', 1 => \'bar\', \'baz\' => \'qux\', 2 => \'quux\', \'quuz\' => \'corge\', 3 => \'grault\')', '$slicedOffset'], ['array(4 => \'foo\', 1 => \'bar\', \'baz\' => \'qux\', 0 => \'quux\', \'quuz\' => \'corge\', 5 => \'grault\')', '$slicedOffsetWithKeys'], ['0|1', 'key($mixedValues)'], ['int|null', 'key($falsey)'], ['string|null', 'key($generalStringKeys)'], ['int|string|null', 'key($generalIntegerOrStringKeysMixedValues)'], ['\'foo\'', '$poppedFoo'], ['int', 'array_rand([1 => 1, 2 => "2"])'], ['string', 'array_rand(["a" => 1, "b" => "2"])'], ['int|string', 'array_rand(["a" => 1, 2 => "b"])'], ['int|string', 'array_rand([1 => 1, 2 => "b", $mixed => $mixed])'], ['int', 'array_rand([1 => 1, 2 => "b"], 1)'], ['string', 'array_rand(["a" => 1, "b" => "b"], 1)'], ['int|string', 'array_rand(["a" => 1, 2 => "b"], 1)'], ['int|string', 'array_rand([1 => 1, 2 => "b", $mixed => $mixed], 1)'], ['array<int, int>', 'array_rand([1 => 1, 2 => "b"], 2)'], ['array<int, string>', 'array_rand(["a" => 1, "b" => "b"], 2)'], ['array<int, int|string>', 'array_rand(["a" => 1, 2 => "b"], 2)'], ['array<int, int|string>', 'array_rand([1 => 1, 2 => "2", $mixed => $mixed], 2)'], ['array<int, int>|int', 'array_rand([1 => 1, 2 => "b"], $mixed)'], ['array<int, string>|string', 'array_rand(["a" => 1, "b" => "b"], $mixed)'], ['array<int, int|string>|int|string', 'array_rand(["a" => 1, 2 => "b"], $mixed)'], ['array<int, int|string>|int|string', 'array_rand([1 => 1, 2 => "b", $mixed => $mixed], $mixed)']];
     }
+    public function dataPseudoTypeOverrides() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/phpdoc-pseudotype-override.php');
+    }
+    public function dataPseudoTypeNamespace() : array
+    {
+        require_once __DIR__ . '/data/phpdoc-pseudotype-namespace.php';
+        return $this->gatherAssertTypes(__DIR__ . '/data/phpdoc-pseudotype-namespace.php');
+    }
+    public function dataPseudoTypeGlobal() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/phpdoc-pseudotype-global.php');
+    }
+    public function dataGenericTraits() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/generic-traits.php');
+    }
+    public function dataBug4423() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/bug-4423.php');
+    }
+    public function dataGenericUnions() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/generic-unions.php');
+    }
+    public function dataGenericParent() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/generic-parent.php');
+    }
+    public function dataBug4247() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/bug-4247.php');
+    }
+    public function dataBug4267() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/bug-4267.php');
+    }
+    public function dataBug2231() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/bug-2231.php');
+    }
+    public function dataBug3558() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/bug-3558.php');
+    }
+    public function dataBug3351() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/bug-3351.php');
+    }
+    public function dataBug4213() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/bug-4213.php');
+    }
     /**
      * @dataProvider dataArrayFunctions
      * @param string $description
@@ -3089,6 +3142,10 @@ class NodeScopeResolverTest extends \TenantCloud\BetterReflection\Relocated\PHPS
     {
         return $this->gatherAssertTypes(__DIR__ . '/data/bug-4642.php');
     }
+    public function dataBug4643() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/../Rules/PhpDoc/data/bug-4643.php');
+    }
     /**
      * @param string $file
      * @return array<string, mixed[]>
@@ -3329,6 +3386,20 @@ class NodeScopeResolverTest extends \TenantCloud\BetterReflection\Relocated\PHPS
      * @dataProvider dataNestedGenericIncompleteConstructor
      * @dataProvider dataIteratorIterator
      * @dataProvider dataBug4642
+     * @dataProvider dataBug4643
+     * @dataProvider dataPseudoTypeGlobal
+     * @dataProvider dataPseudoTypeNamespace
+     * @dataProvider dataPseudoTypeOverrides
+     * @dataProvider dataGenericTraits
+     * @dataProvider dataBug4423
+     * @dataProvider dataGenericUnions
+     * @dataProvider dataGenericParent
+     * @dataProvider dataBug4247
+     * @dataProvider dataBug4267
+     * @dataProvider dataBug2231
+     * @dataProvider dataBug3558
+     * @dataProvider dataBug3351
+     * @dataProvider dataBug4213
      * @param string $assertType
      * @param string $file
      * @param mixed ...$args

@@ -17,8 +17,10 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\PhpDoc\Tag\TemplateTag;
 use TenantCloud\BetterReflection\Relocated\PHPStan\PhpDocParser\Ast\PhpDoc\InvalidTagValueNode;
 use TenantCloud\BetterReflection\Relocated\PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocNode;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ReflectionProvider\ReflectionProviderProvider;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\GenericObjectType;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeFactory;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeHelper;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap;
 use function array_key_exists;
 use function file_exists;
@@ -57,7 +59,7 @@ class FileTypeMapper
         if ($className === null && $traitName !== null) {
             throw new \TenantCloud\BetterReflection\Relocated\PHPStan\ShouldNotHappenException();
         }
-        $phpDocKey = $this->getPhpDocKey($className, $traitName, $functionName, $docComment);
+        $phpDocKey = $this->getPhpDocKey($fileName, $className, $traitName, $functionName, $docComment);
         if (isset($this->resolvedPhpDocBlockCache[$phpDocKey])) {
             return $this->resolvedPhpDocBlockCache[$phpDocKey];
         }
@@ -150,7 +152,7 @@ class FileTypeMapper
     private function getResolvedPhpDocMap(string $fileName) : array
     {
         if (!isset($this->memoryCache[$fileName])) {
-            $cacheKey = \sprintf('%s-phpdocstring-v5-namespace', $fileName);
+            $cacheKey = \sprintf('%s-phpdocstring-v8-alias-collision', $fileName);
             $variableCacheKey = \implode(',', \array_map(static function (array $file) : string {
                 return \sprintf('%s-%d', $file['filename'], $file['modifiedTime']);
             }, $this->getCachedDependentFilesWithTimestamps($fileName)));
@@ -230,44 +232,7 @@ class FileTypeMapper
                     $resolvableTemplateTypes = \true;
                 }
             } elseif ($node instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Stmt\TraitUse) {
-                $traitMethodAliases = [];
-                foreach ($node->adaptations as $traitUseAdaptation) {
-                    if (!$traitUseAdaptation instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Stmt\TraitUseAdaptation\Alias) {
-                        continue;
-                    }
-                    if ($traitUseAdaptation->trait === null) {
-                        continue;
-                    }
-                    if ($traitUseAdaptation->newName === null) {
-                        continue;
-                    }
-                    $traitMethodAliases[$traitUseAdaptation->trait->toString()][$traitUseAdaptation->method->toString()] = $traitUseAdaptation->newName->toString();
-                }
-                foreach ($node->traits as $traitName) {
-                    /** @var class-string $traitName */
-                    $traitName = (string) $traitName;
-                    $reflectionProvider = $this->reflectionProviderProvider->getReflectionProvider();
-                    if (!$reflectionProvider->hasClass($traitName)) {
-                        continue;
-                    }
-                    $traitReflection = $reflectionProvider->getClass($traitName);
-                    if (!$traitReflection->isTrait()) {
-                        continue;
-                    }
-                    if ($traitReflection->getFileName() === \false) {
-                        continue;
-                    }
-                    if (!\file_exists($traitReflection->getFileName())) {
-                        continue;
-                    }
-                    $className = $classStack[\count($classStack) - 1] ?? null;
-                    if ($className === null) {
-                        throw new \TenantCloud\BetterReflection\Relocated\PHPStan\ShouldNotHappenException();
-                    }
-                    $traitPhpDocMap = $this->createFilePhpDocMap($traitReflection->getFileName(), $traitName, $className, $traitMethodAliases[$traitName] ?? []);
-                    $phpDocMap = \array_merge($phpDocMap, $traitPhpDocMap);
-                }
-                return null;
+                $resolvableTemplateTypes = \true;
             } elseif ($node instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Stmt\ClassMethod) {
                 $functionName = $node->name->name;
                 if (\array_key_exists($functionName, $traitMethodAliases)) {
@@ -291,7 +256,7 @@ class FileTypeMapper
                 $phpDocString = $comment->getText();
                 $className = $classStack[\count($classStack) - 1] ?? null;
                 $typeMapCb = $typeMapStack[\count($typeMapStack) - 1] ?? null;
-                $phpDocKey = $this->getPhpDocKey($className, $lookForTrait, $functionName, $phpDocString);
+                $phpDocKey = $this->getPhpDocKey($fileName, $className, $lookForTrait, $functionName, $phpDocString);
                 $phpDocMap[$phpDocKey] = static function () use($phpDocString, $namespace, $uses, $className, $functionName, $typeMapCb, $resolvableTemplateTypes) : NameScopedPhpDocString {
                     $nameScope = new \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\NameScope($namespace, $uses, $className, $functionName, ($typeMapCb !== null ? $typeMapCb() : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap::createEmpty())->map(static function (string $name, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type) use($className, $resolvableTemplateTypes) : Type {
                         return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeTraverser::map($type, static function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type, callable $traverse) use($className, $resolvableTemplateTypes) : Type {
@@ -314,10 +279,6 @@ class FileTypeMapper
                     continue;
                 }
                 $typeMapStack[] = function () use($fileName, $className, $lookForTrait, $functionName, $phpDocString, $typeMapCb) : TemplateTypeMap {
-                    static $typeMap = null;
-                    if ($typeMap !== null) {
-                        return $typeMap;
-                    }
                     $resolvedPhpDoc = $this->getResolvedPhpDoc($fileName, $className, $lookForTrait, $functionName, $phpDocString);
                     return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap(\array_merge($typeMapCb !== null ? $typeMapCb()->getTypes() : [], $resolvedPhpDoc->getTemplateTypeMap()->getTypes()));
                 };
@@ -336,6 +297,81 @@ class FileTypeMapper
                         continue;
                     }
                     $uses[\strtolower($use->getAlias()->name)] = \sprintf('%s\\%s', $prefix, (string) $use->name);
+                }
+            } elseif ($node instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Stmt\TraitUse) {
+                $traitMethodAliases = [];
+                foreach ($node->adaptations as $traitUseAdaptation) {
+                    if (!$traitUseAdaptation instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Stmt\TraitUseAdaptation\Alias) {
+                        continue;
+                    }
+                    if ($traitUseAdaptation->trait === null) {
+                        continue;
+                    }
+                    if ($traitUseAdaptation->newName === null) {
+                        continue;
+                    }
+                    $traitMethodAliases[$traitUseAdaptation->trait->toString()][$traitUseAdaptation->method->toString()] = $traitUseAdaptation->newName->toString();
+                }
+                $useDocComment = null;
+                if ($node->getDocComment() !== null) {
+                    $useDocComment = $node->getDocComment()->getText();
+                }
+                foreach ($node->traits as $traitName) {
+                    /** @var class-string $traitName */
+                    $traitName = (string) $traitName;
+                    $reflectionProvider = $this->reflectionProviderProvider->getReflectionProvider();
+                    if (!$reflectionProvider->hasClass($traitName)) {
+                        continue;
+                    }
+                    $traitReflection = $reflectionProvider->getClass($traitName);
+                    if (!$traitReflection->isTrait()) {
+                        continue;
+                    }
+                    if ($traitReflection->getFileName() === \false) {
+                        continue;
+                    }
+                    if (!\file_exists($traitReflection->getFileName())) {
+                        continue;
+                    }
+                    $className = $classStack[\count($classStack) - 1] ?? null;
+                    if ($className === null) {
+                        throw new \TenantCloud\BetterReflection\Relocated\PHPStan\ShouldNotHappenException();
+                    }
+                    $traitPhpDocMap = $this->createFilePhpDocMap($traitReflection->getFileName(), $traitName, $className, $traitMethodAliases[$traitName] ?? []);
+                    $finalTraitPhpDocMap = [];
+                    foreach ($traitPhpDocMap as $phpDocKey => $callback) {
+                        $finalTraitPhpDocMap[$phpDocKey] = function () use($callback, $traitReflection, $fileName, $className, $lookForTrait, $useDocComment) : NameScopedPhpDocString {
+                            /** @var NameScopedPhpDocString $original */
+                            $original = $callback();
+                            if (!$traitReflection->isGeneric()) {
+                                return $original;
+                            }
+                            $traitTemplateTypeMap = $traitReflection->getTemplateTypeMap();
+                            $useType = null;
+                            if ($useDocComment !== null) {
+                                $useTags = $this->getResolvedPhpDoc($fileName, $className, $lookForTrait, null, $useDocComment)->getUsesTags();
+                                foreach ($useTags as $useTag) {
+                                    $useTagType = $useTag->getType();
+                                    if (!$useTagType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\GenericObjectType) {
+                                        continue;
+                                    }
+                                    if ($useTagType->getClassName() !== $traitReflection->getName()) {
+                                        continue;
+                                    }
+                                    $useType = $useTagType;
+                                    break;
+                                }
+                            }
+                            if ($useType === null) {
+                                return new \TenantCloud\BetterReflection\Relocated\PHPStan\PhpDoc\NameScopedPhpDocString($original->getPhpDocString(), $original->getNameScope()->withTemplateTypeMap($traitTemplateTypeMap->resolveToBounds()));
+                            }
+                            $transformedTraitTypeMap = $traitReflection->typeMapFromList($useType->getTypes());
+                            return new \TenantCloud\BetterReflection\Relocated\PHPStan\PhpDoc\NameScopedPhpDocString($original->getPhpDocString(), $original->getNameScope()->withTemplateTypeMap($traitTemplateTypeMap->map(static function (string $name, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type) use($transformedTraitTypeMap) : Type {
+                                return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeHelper::resolveTemplateTypes($type, $transformedTraitTypeMap);
+                            })));
+                        };
+                    }
+                    $phpDocMap = \array_merge($phpDocMap, $finalTraitPhpDocMap);
                 }
             }
             return null;
@@ -387,13 +423,16 @@ class FileTypeMapper
             }
         }
     }
-    private function getPhpDocKey(?string $class, ?string $trait, ?string $function, string $docComment) : string
+    private function getPhpDocKey(string $file, ?string $class, ?string $trait, ?string $function, string $docComment) : string
     {
         $cacheKey = \md5($docComment);
         if (!isset($this->docKeys[$cacheKey])) {
             $this->docKeys[$cacheKey] = \TenantCloud\BetterReflection\Relocated\Nette\Utils\Strings::replace($docComment, '#\\s+#', ' ');
         }
         $docComment = $this->docKeys[$cacheKey];
+        if ($class === null && $trait === null && $function === null) {
+            return \md5(\sprintf('%s-%s', $file, $docComment));
+        }
         return \md5(\sprintf('%s-%s-%s-%s', $class, $trait, $function, $docComment));
     }
     /**

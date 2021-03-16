@@ -122,4 +122,13 @@ class FileTypeMapperTest extends \TenantCloud\BetterReflection\Relocated\PHPStan
         $returnTag = $resolved->getReturnTag();
         $this->assertSame('CyclicPhpDocs\\Foo|iterable<CyclicPhpDocs\\Foo>', $returnTag->getType()->describe(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\VerbosityLevel::precise()));
     }
+    public function testFilesWithIdenticalPhpDocsUsingDifferentAliases() : void
+    {
+        /** @var FileTypeMapper $fileTypeMapper */
+        $fileTypeMapper = self::getContainer()->getByType(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\FileTypeMapper::class);
+        $doc1 = $fileTypeMapper->getResolvedPhpDoc(__DIR__ . '/data/alias-collision1.php', null, null, null, '/** @var Foo $x */');
+        $doc2 = $fileTypeMapper->getResolvedPhpDoc(__DIR__ . '/data/alias-collision2.php', null, null, null, '/** @var Foo $x */');
+        $this->assertSame('TenantCloud\\BetterReflection\\Relocated\\AliasCollisionNamespace1\\Foo', $doc1->getVarTags()['x']->getType()->describe(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\VerbosityLevel::precise()));
+        $this->assertSame('TenantCloud\\BetterReflection\\Relocated\\AliasCollisionNamespace2\\Foo', $doc2->getVarTags()['x']->getType()->describe(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\VerbosityLevel::precise()));
+    }
 }

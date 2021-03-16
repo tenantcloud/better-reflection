@@ -52,9 +52,13 @@ final class Property
         return $this->static;
     }
     /** @return static */
-    public function setType(?string $val) : self
+    public function setType(?string $type) : self
     {
-        $this->type = $val;
+        if ($type && $type[0] === '?') {
+            $type = \substr($type, 1);
+            $this->nullable = \true;
+        }
+        $this->type = $type;
         return $this;
     }
     public function getType() : ?string

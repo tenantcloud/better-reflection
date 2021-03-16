@@ -7,7 +7,10 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessA
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ConstantReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection;
-use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnionTypeMethodReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnionTypeUnresolvedMethodPrototypeReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnionTypeUnresolvedPropertyPrototypeReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedMethodPrototypeReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedPropertyPrototypeReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Constant\ConstantBooleanType;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap;
@@ -198,11 +201,25 @@ class UnionType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type\
     }
     public function getProperty(string $propertyName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection
     {
-        return $this->getInternal(static function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type) use($propertyName) : TrinaryLogic {
-            return $type->hasProperty($propertyName);
-        }, static function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type) use($propertyName, $scope) : PropertyReflection {
-            return $type->getProperty($propertyName, $scope);
-        });
+        return $this->getUnresolvedPropertyPrototype($propertyName, $scope)->getTransformedProperty();
+    }
+    public function getUnresolvedPropertyPrototype(string $propertyName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedPropertyPrototypeReflection
+    {
+        $propertyPrototypes = [];
+        foreach ($this->types as $type) {
+            if (!$type->hasProperty($propertyName)->yes()) {
+                continue;
+            }
+            $propertyPrototypes[] = $type->getUnresolvedPropertyPrototype($propertyName, $scope)->withFechedOnType($this);
+        }
+        $propertiesCount = \count($propertyPrototypes);
+        if ($propertiesCount === 0) {
+            throw new \TenantCloud\BetterReflection\Relocated\PHPStan\ShouldNotHappenException();
+        }
+        if ($propertiesCount === 1) {
+            return $propertyPrototypes[0];
+        }
+        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnionTypeUnresolvedPropertyPrototypeReflection($propertyName, $propertyPrototypes);
     }
     public function canCallMethods() : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
     {
@@ -218,21 +235,25 @@ class UnionType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type\
     }
     public function getMethod(string $methodName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection
     {
-        $methods = [];
+        return $this->getUnresolvedMethodPrototype($methodName, $scope)->getTransformedMethod();
+    }
+    public function getUnresolvedMethodPrototype(string $methodName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedMethodPrototypeReflection
+    {
+        $methodPrototypes = [];
         foreach ($this->types as $type) {
             if (!$type->hasMethod($methodName)->yes()) {
                 continue;
             }
-            $methods[] = $type->getMethod($methodName, $scope);
+            $methodPrototypes[] = $type->getUnresolvedMethodPrototype($methodName, $scope)->withCalledOnType($this);
         }
-        $methodsCount = \count($methods);
+        $methodsCount = \count($methodPrototypes);
         if ($methodsCount === 0) {
             throw new \TenantCloud\BetterReflection\Relocated\PHPStan\ShouldNotHappenException();
         }
         if ($methodsCount === 1) {
-            return $methods[0];
+            return $methodPrototypes[0];
         }
-        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnionTypeMethodReflection($methodName, $methods);
+        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnionTypeUnresolvedMethodPrototypeReflection($methodName, $methodPrototypes);
     }
     public function canAccessConstants() : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
     {
@@ -445,7 +466,27 @@ class UnionType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type\
     public function inferTemplateTypes(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $receivedType) : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap
     {
         $types = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap::createEmpty();
-        foreach ($this->types as $type) {
+        if ($receivedType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType) {
+            $myTypes = [];
+            $remainingReceivedTypes = [];
+            foreach ($receivedType->getTypes() as $receivedInnerType) {
+                foreach ($this->types as $type) {
+                    if ($type->isSuperTypeOf($receivedInnerType)->yes()) {
+                        $types = $types->union($type->inferTemplateTypes($receivedInnerType));
+                        continue 2;
+                    }
+                    $myTypes[] = $type;
+                }
+                $remainingReceivedTypes[] = $receivedInnerType;
+            }
+            if (\count($remainingReceivedTypes) === 0) {
+                return $types;
+            }
+            $receivedType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeCombinator::union(...$remainingReceivedTypes);
+        } else {
+            $myTypes = $this->types;
+        }
+        foreach ($myTypes as $type) {
             $types = $types->union($type->inferTemplateTypes($receivedType));
         }
         return $types;

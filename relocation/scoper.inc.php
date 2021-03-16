@@ -66,6 +66,20 @@ return [
 		};
 	}, [
 		function (string $filePath, string $prefix, string $content): string {
+			if (
+				!str_ends_with($filePath, 'vendor/phpstan/phpstan-src/src/Reflection/BetterReflection/SourceStubber/Php8StubsSourceStubber.php') &&
+				!str_ends_with($filePath, 'vendor/phpstan/phpstan-src/src/Reflection/SignatureMap/Php8SignatureMapProvider.php')
+			) {
+				return $content;
+			}
+
+			return str_replace(
+				'/../../../vendor/',
+				'/../../../../../',
+				$content,
+			);
+		},
+		function (string $filePath, string $prefix, string $content): string {
 			if (!str_ends_with($filePath, 'vendor/nette/di/src/DI/Compiler.php')) {
 				return $content;
 			}

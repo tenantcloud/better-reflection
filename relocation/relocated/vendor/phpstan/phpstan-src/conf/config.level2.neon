@@ -21,6 +21,7 @@ rules:
 	- TenantCloud\BetterReflection\Relocated\PHPStan\Rules\Generics\MethodTemplateTypeRule
 	- TenantCloud\BetterReflection\Relocated\PHPStan\Rules\Generics\MethodSignatureVarianceRule
 	- TenantCloud\BetterReflection\Relocated\PHPStan\Rules\Generics\TraitTemplateTypeRule
+	- TenantCloud\BetterReflection\Relocated\PHPStan\Rules\Generics\UsedTraitsRule
 	- TenantCloud\BetterReflection\Relocated\PHPStan\Rules\Methods\IncompatibleDefaultParameterTypeRule
 	- TenantCloud\BetterReflection\Relocated\PHPStan\Rules\Operators\InvalidBinaryOperationRule
 	- TenantCloud\BetterReflection\Relocated\PHPStan\Rules\Operators\InvalidUnaryOperationRule

@@ -582,8 +582,13 @@ class MutatingScope implements \TenantCloud\BetterReflection\Relocated\PHPStan\A
             }
             $uncertainty = \false;
             if ($node->class instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Name) {
-                $className = $this->resolveName($node->class);
-                $classType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($className);
+                $unresolvedClassName = $node->class->toString();
+                if (\strtolower($unresolvedClassName) === 'static' && $this->isInClass()) {
+                    $classType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType($this->getClassReflection());
+                } else {
+                    $className = $this->resolveName($node->class);
+                    $classType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($className);
+                }
             } else {
                 $classType = $this->getType($node->class);
                 $classType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeTraverser::map($classType, static function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type, callable $traverse) use(&$uncertainty) : Type {
@@ -978,7 +983,7 @@ class MutatingScope implements \TenantCloud\BetterReflection\Relocated\PHPStan\A
                     if (!$this->isInClass()) {
                         return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ErrorType();
                     }
-                    return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType($this->getClassReflection()->getName());
+                    return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType($this->getClassReflection());
                 }
                 if ($lowercasedClassName === 'parent') {
                     return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\NonexistentParentClassType();
@@ -1243,7 +1248,7 @@ class MutatingScope implements \TenantCloud\BetterReflection\Relocated\PHPStan\A
                         $namesToResolve[] = 'static';
                     } elseif (\strtolower($constantClass) === 'static') {
                         if (\strtolower($constantName) === 'class') {
-                            return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\GenericClassStringType(new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType($this->getClassReflection()->getName()));
+                            return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\GenericClassStringType(new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType($this->getClassReflection()));
                         }
                         return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType();
                     }
@@ -1253,7 +1258,7 @@ class MutatingScope implements \TenantCloud\BetterReflection\Relocated\PHPStan\A
                     if ($resolvedName === 'parent' && \strtolower($constantName) === 'class') {
                         return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ClassStringType();
                     }
-                    $constantClassType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($resolvedName);
+                    $constantClassType = $this->resolveTypeByName($node->class);
                 }
                 if (\strtolower($constantName) === 'class') {
                     return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Constant\ConstantStringType($constantClassType->getClassName(), \true);
@@ -1327,30 +1332,8 @@ class MutatingScope implements \TenantCloud\BetterReflection\Relocated\PHPStan\A
         }
         if ($node instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr\MethodCall && $node->name instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Identifier) {
             $typeCallback = function () use($node) : Type {
-                $methodCalledOnType = $this->getType($node->var);
-                $methodName = $node->name->name;
-                $map = function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type, callable $traverse) use($methodName, $node) : Type {
-                    if ($type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType) {
-                        return $traverse($type);
-                    }
-                    if ($type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntersectionType) {
-                        $returnTypes = [];
-                        foreach ($type->getTypes() as $innerType) {
-                            $returnType = $this->methodCallReturnType($type, $innerType, $methodName, $node);
-                            if ($returnType === null) {
-                                continue;
-                            }
-                            $returnTypes[] = $returnType;
-                        }
-                        if (\count($returnTypes) === 0) {
-                            return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\NeverType();
-                        }
-                        return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeCombinator::intersect(...$returnTypes);
-                    }
-                    return $this->methodCallReturnType($type, $type, $methodName, $node) ?? new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\NeverType();
-                };
-                $returnType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeTraverser::map($methodCalledOnType, $map);
-                if ($returnType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\NeverType && !$returnType->isExplicit()) {
+                $returnType = $this->methodCallReturnType($this->getType($node->var), $node->name->name, $node);
+                if ($returnType === null) {
                     return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ErrorType();
                 }
                 return $returnType;
@@ -1363,36 +1346,15 @@ class MutatingScope implements \TenantCloud\BetterReflection\Relocated\PHPStan\A
         if ($node instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr\StaticCall && $node->name instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Identifier) {
             $typeCallback = function () use($node) : Type {
                 if ($node->class instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Name) {
-                    $staticMethodCalledOnType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($this->resolveName($node->class));
+                    $staticMethodCalledOnType = $this->resolveTypeByName($node->class);
                 } else {
                     $staticMethodCalledOnType = $this->getType($node->class);
                     if ($staticMethodCalledOnType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\GenericClassStringType) {
                         $staticMethodCalledOnType = $staticMethodCalledOnType->getGenericType();
                     }
                 }
-                $methodName = $node->name->toString();
-                $map = function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type, callable $traverse) use($methodName, $node) : Type {
-                    if ($type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType) {
-                        return $traverse($type);
-                    }
-                    if ($type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntersectionType) {
-                        $returnTypes = [];
-                        foreach ($type->getTypes() as $innerType) {
-                            $returnType = $this->methodCallReturnType($type, $innerType, $methodName, $node);
-                            if ($returnType === null) {
-                                continue;
-                            }
-                            $returnTypes[] = $returnType;
-                        }
-                        if (\count($returnTypes) === 0) {
-                            return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\NeverType();
-                        }
-                        return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeCombinator::intersect(...$returnTypes);
-                    }
-                    return $this->methodCallReturnType($type, $type, $methodName, $node) ?? new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\NeverType();
-                };
-                $returnType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeTraverser::map($staticMethodCalledOnType, $map);
-                if ($returnType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\NeverType && !$returnType->isExplicit()) {
+                $returnType = $this->methodCallReturnType($staticMethodCalledOnType, $node->name->toString(), $node);
+                if ($returnType === null) {
                     return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ErrorType();
                 }
                 return $returnType;
@@ -1405,30 +1367,8 @@ class MutatingScope implements \TenantCloud\BetterReflection\Relocated\PHPStan\A
         }
         if ($node instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr\PropertyFetch && $node->name instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Identifier) {
             $typeCallback = function () use($node) : Type {
-                $propertyFetchedOnType = $this->getType($node->var);
-                $propertyName = $node->name->name;
-                $map = function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type, callable $traverse) use($propertyName, $node) : Type {
-                    if ($type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType) {
-                        return $traverse($type);
-                    }
-                    if ($type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntersectionType) {
-                        $returnTypes = [];
-                        foreach ($type->getTypes() as $innerType) {
-                            $returnType = $this->propertyFetchType($innerType, $propertyName, $node);
-                            if ($returnType === null) {
-                                continue;
-                            }
-                            $returnTypes[] = $returnType;
-                        }
-                        if (\count($returnTypes) === 0) {
-                            return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\NeverType();
-                        }
-                        return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeCombinator::intersect(...$returnTypes);
-                    }
-                    return $this->propertyFetchType($type, $propertyName, $node) ?? new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\NeverType();
-                };
-                $returnType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeTraverser::map($propertyFetchedOnType, $map);
-                if ($returnType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\NeverType) {
+                $returnType = $this->propertyFetchType($this->getType($node->var), $node->name->name, $node);
+                if ($returnType === null) {
                     return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ErrorType();
                 }
                 return $returnType;
@@ -1441,36 +1381,15 @@ class MutatingScope implements \TenantCloud\BetterReflection\Relocated\PHPStan\A
         if ($node instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr\StaticPropertyFetch && $node->name instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\VarLikeIdentifier) {
             $typeCallback = function () use($node) : Type {
                 if ($node->class instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Name) {
-                    $staticPropertyFetchedOnType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($this->resolveName($node->class));
+                    $staticPropertyFetchedOnType = $this->resolveTypeByName($node->class);
                 } else {
                     $staticPropertyFetchedOnType = $this->getType($node->class);
                     if ($staticPropertyFetchedOnType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\GenericClassStringType) {
                         $staticPropertyFetchedOnType = $staticPropertyFetchedOnType->getGenericType();
                     }
                 }
-                $staticPropertyName = $node->name->toString();
-                $map = function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type, callable $traverse) use($staticPropertyName, $node) : Type {
-                    if ($type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType) {
-                        return $traverse($type);
-                    }
-                    if ($type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntersectionType) {
-                        $returnTypes = [];
-                        foreach ($type->getTypes() as $innerType) {
-                            $returnType = $this->propertyFetchType($innerType, $staticPropertyName, $node);
-                            if ($returnType === null) {
-                                continue;
-                            }
-                            $returnTypes[] = $returnType;
-                        }
-                        if (\count($returnTypes) === 0) {
-                            return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\NeverType();
-                        }
-                        return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeCombinator::intersect(...$returnTypes);
-                    }
-                    return $this->propertyFetchType($type, $staticPropertyName, $node) ?? new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\NeverType();
-                };
-                $returnType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeTraverser::map($staticPropertyFetchedOnType, $map);
-                if ($returnType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\NeverType) {
+                $returnType = $this->propertyFetchType($staticPropertyFetchedOnType, $node->name->toString(), $node);
+                if ($returnType === null) {
                     return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ErrorType();
                 }
                 return $returnType;
@@ -1697,6 +1616,22 @@ class MutatingScope implements \TenantCloud\BetterReflection\Relocated\PHPStan\A
             }
         }
         return $originalClass;
+    }
+    public function resolveTypeByName(\TenantCloud\BetterReflection\Relocated\PhpParser\Node\Name $name) : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeWithClassName
+    {
+        if ($name->toLowerString() === 'static' && $this->isInClass()) {
+            $classReflection = $this->getClassReflection();
+            return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType($classReflection);
+        }
+        $originalClass = $this->resolveName($name);
+        if ($this->isInClass()) {
+            $thisType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ThisType($this->getClassReflection());
+            $ancestor = $thisType->getAncestorWithClassName($originalClass);
+            if ($ancestor !== null) {
+                return $ancestor;
+            }
+        }
+        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($originalClass);
     }
     /**
      * @param mixed $value
@@ -2996,29 +2931,41 @@ class MutatingScope implements \TenantCloud\BetterReflection\Relocated\PHPStan\A
         return $decidedType;
     }
     /**
-     * @param \PHPStan\Type\Type $calledOnType
      * @param \PHPStan\Type\Type $typeWithMethod
      * @param string $methodName
      * @param MethodCall|\PhpParser\Node\Expr\StaticCall $methodCall
      * @return \PHPStan\Type\Type|null
      */
-    private function methodCallReturnType(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $calledOnType, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $typeWithMethod, string $methodName, \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr $methodCall) : ?\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type
+    private function methodCallReturnType(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $typeWithMethod, string $methodName, \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr $methodCall) : ?\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type
     {
+        if ($typeWithMethod instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType) {
+            $newTypes = [];
+            foreach ($typeWithMethod->getTypes() as $innerType) {
+                if (!$innerType->hasMethod($methodName)->yes()) {
+                    continue;
+                }
+                $newTypes[] = $innerType;
+            }
+            if (\count($newTypes) === 0) {
+                return null;
+            }
+            $typeWithMethod = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeCombinator::union(...$newTypes);
+        }
         if (!$typeWithMethod->hasMethod($methodName)->yes()) {
             return null;
         }
         $methodReflection = $typeWithMethod->getMethod($methodName, $this);
         $resolvedTypes = [];
-        if ($typeWithMethod instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeWithClassName) {
+        foreach (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeUtils::getDirectClassNames($typeWithMethod) as $className) {
             if ($methodCall instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr\MethodCall) {
-                foreach ($this->dynamicReturnTypeExtensionRegistry->getDynamicMethodReturnTypeExtensionsForClass($typeWithMethod->getClassName()) as $dynamicMethodReturnTypeExtension) {
+                foreach ($this->dynamicReturnTypeExtensionRegistry->getDynamicMethodReturnTypeExtensionsForClass($className) as $dynamicMethodReturnTypeExtension) {
                     if (!$dynamicMethodReturnTypeExtension->isMethodSupported($methodReflection)) {
                         continue;
                     }
                     $resolvedTypes[] = $dynamicMethodReturnTypeExtension->getTypeFromMethodCall($methodReflection, $methodCall, $this);
                 }
             } else {
-                foreach ($this->dynamicReturnTypeExtensionRegistry->getDynamicStaticMethodReturnTypeExtensionsForClass($typeWithMethod->getClassName()) as $dynamicStaticMethodReturnTypeExtension) {
+                foreach ($this->dynamicReturnTypeExtensionRegistry->getDynamicStaticMethodReturnTypeExtensionsForClass($className) as $dynamicStaticMethodReturnTypeExtension) {
                     if (!$dynamicStaticMethodReturnTypeExtension->isStaticMethodSupported($methodReflection)) {
                         continue;
                     }
@@ -3027,39 +2974,9 @@ class MutatingScope implements \TenantCloud\BetterReflection\Relocated\PHPStan\A
             }
         }
         if (\count($resolvedTypes) > 0) {
-            $methodReturnType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeCombinator::union(...$resolvedTypes);
-        } else {
-            $methodReturnType = \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectFromArgs($this, $methodCall->args, $methodReflection->getVariants())->getReturnType();
+            return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeCombinator::union(...$resolvedTypes);
         }
-        if ($methodCall instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr\MethodCall) {
-            $calledOnThis = $calledOnType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType && $this->isInClass();
-        } else {
-            if (!$methodCall->class instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Name) {
-                $calledOnThis = \false;
-            } else {
-                $calledOnThis = \in_array(\strtolower($methodCall->class->toString()), ['self', 'static', 'parent'], \true) && $this->isInClass();
-            }
-        }
-        $transformedCalledOnType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeTraverser::map($calledOnType, function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type, callable $traverse) use($calledOnThis) : Type {
-            if ($type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType) {
-                if ($calledOnThis && $this->isInClass()) {
-                    return $traverse($type->changeBaseClass($this->getClassReflection()));
-                }
-                if ($this->isInClass()) {
-                    return $traverse($type->changeBaseClass($this->getClassReflection())->getStaticObjectType());
-                }
-            }
-            return $traverse($type);
-        });
-        return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeTraverser::map($methodReturnType, function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $returnType, callable $traverse) use($transformedCalledOnType, $calledOnThis) : Type {
-            if ($returnType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType) {
-                if ($calledOnThis && $this->isInClass()) {
-                    return $traverse($returnType->changeBaseClass($this->getClassReflection()));
-                }
-                return $traverse($transformedCalledOnType);
-            }
-            return $traverse($returnType);
-        });
+        return \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectFromArgs($this, $methodCall->args, $methodReflection->getVariants())->getReturnType();
     }
     /**
      * @param \PHPStan\Type\Type $fetchedOnType
@@ -3069,43 +2986,26 @@ class MutatingScope implements \TenantCloud\BetterReflection\Relocated\PHPStan\A
      */
     private function propertyFetchType(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $fetchedOnType, string $propertyName, \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr $propertyFetch) : ?\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type
     {
+        if ($fetchedOnType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType) {
+            $newTypes = [];
+            foreach ($fetchedOnType->getTypes() as $innerType) {
+                if (!$innerType->hasProperty($propertyName)->yes()) {
+                    continue;
+                }
+                $newTypes[] = $innerType;
+            }
+            if (\count($newTypes) === 0) {
+                return null;
+            }
+            $fetchedOnType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeCombinator::union(...$newTypes);
+        }
         if (!$fetchedOnType->hasProperty($propertyName)->yes()) {
             return null;
         }
         $propertyReflection = $fetchedOnType->getProperty($propertyName, $this);
         if ($this->isInExpressionAssign($propertyFetch)) {
-            $propertyType = $propertyReflection->getWritableType();
-        } else {
-            $propertyType = $propertyReflection->getReadableType();
+            return $propertyReflection->getWritableType();
         }
-        if ($propertyFetch instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr\PropertyFetch) {
-            $fetchedOnThis = $fetchedOnType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType && $this->isInClass();
-        } else {
-            if (!$propertyFetch->class instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Name) {
-                $fetchedOnThis = \false;
-            } else {
-                $fetchedOnThis = \in_array(\strtolower($propertyFetch->class->toString()), ['self', 'static', 'parent'], \true) && $this->isInClass();
-            }
-        }
-        $transformedFetchedOnType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeTraverser::map($fetchedOnType, function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type, callable $traverse) use($fetchedOnThis) : Type {
-            if ($type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType) {
-                if ($fetchedOnThis && $this->isInClass()) {
-                    return $traverse($type->changeBaseClass($this->getClassReflection()));
-                }
-                if ($this->isInClass()) {
-                    return $traverse($type->changeBaseClass($this->getClassReflection())->getStaticObjectType());
-                }
-            }
-            return $traverse($type);
-        });
-        return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeTraverser::map($propertyType, function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $propertyType, callable $traverse) use($transformedFetchedOnType, $fetchedOnThis) : Type {
-            if ($propertyType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType) {
-                if ($fetchedOnThis && $this->isInClass()) {
-                    return $traverse($propertyType->changeBaseClass($this->getClassReflection()));
-                }
-                return $traverse($transformedFetchedOnType);
-            }
-            return $traverse($propertyType);
-        });
+        return $propertyReflection->getReadableType();
     }
 }

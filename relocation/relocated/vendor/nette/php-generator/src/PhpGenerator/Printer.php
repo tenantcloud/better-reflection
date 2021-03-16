@@ -47,7 +47,7 @@ class Printer
                 throw new \TenantCloud\BetterReflection\Relocated\Nette\InvalidArgumentException('Arrow function cannot bind variables by-reference.');
             }
         }
-        return self::printAttributes($closure->getAttributes(), null) . 'fn ' . ($closure->getReturnReference() ? '&' : '') . $this->printParameters($closure, null) . $this->printReturnType($closure, null) . ' => ' . \trim($closure->getBody()) . ';';
+        return self::printAttributes($closure->getAttributes(), null) . 'fn' . ($closure->getReturnReference() ? '&' : '') . $this->printParameters($closure, null) . $this->printReturnType($closure, null) . ' => ' . \trim($closure->getBody()) . ';';
     }
     public function printMethod(\TenantCloud\BetterReflection\Relocated\Nette\PhpGenerator\Method $method, \TenantCloud\BetterReflection\Relocated\Nette\PhpGenerator\PhpNamespace $namespace = null) : string
     {

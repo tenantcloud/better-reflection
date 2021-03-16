@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace StubTests;
 
-use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use StubTests\Model\PHPClass;
 use StubTests\Model\PHPFunction;
@@ -17,15 +16,8 @@ use StubTests\TestData\Providers\EntitiesFilter;
 use StubTests\TestData\Providers\PhpStormStubsSingleton;
 use StubTests\TestData\Providers\ReflectionStubsSingleton;
 
-class StubsTypeHintsTest extends TestCase
+class StubsTypeHintsTest extends BaseStubsTest
 {
-    public static function setUpBeforeClass(): void
-    {
-        parent::setUpBeforeClass();
-        PhpStormStubsSingleton::getPhpStormStubs();
-        ReflectionStubsSingleton::getReflectionStubs();
-    }
-
     /**
      * @dataProvider \StubTests\TestData\Providers\Reflection\ReflectionFunctionsProvider::allFunctionsProvider
      * @param PHPFunction $function
@@ -106,7 +98,7 @@ class StubsTypeHintsTest extends TestCase
         }
         $stubParameter = current(array_filter($stubMethod->parameters,
             fn(PHPParameter $stubParameter) => $stubParameter->name === $reflectionParameter->name));
-        self::assertNotFalse($stubParameter, "Parameter $$reflectionParameter->name not found at
+        self::assertNotFalse($stubParameter, "Parameter $$reflectionParameter->name not found at 
         $reflectionClass->name::$stubMethod->name(" .
             StubsParameterNamesTest::printParameters($stubMethod->parameters) . ')');
         if (!$reflectionParameter->hasMutedProblem(StubProblemType::PARAMETER_REFERENCE)) {
@@ -128,7 +120,7 @@ class StubsTypeHintsTest extends TestCase
     {
         $sinceVersion = Utils::getDeclaredSinceVersion($stubMethod);
         self::assertEmpty(array_intersect(['int', 'float', 'string', 'bool'], $parameter->typesFromSignature),
-            "Method '$class->name::$stubMethod->name' with @since '$sinceVersion'
+            "Method '$class->name::$stubMethod->name' with @since '$sinceVersion'  
                 has parameter '$parameter->name' with typehint '" . implode('|', $parameter->typesFromSignature) .
             "' but typehints available only since php 7");
     }
@@ -144,8 +136,8 @@ class StubsTypeHintsTest extends TestCase
     {
         $sinceVersion = Utils::getDeclaredSinceVersion($stubMethod);
         self::assertEmpty(array_filter($parameter->typesFromSignature, fn(string $type) => str_contains($type, '?')),
-            "Method '$class->name::$stubMethod->name' with @since '$sinceVersion'
-                has nullable parameter '$parameter->name' with typehint '" . implode('|', $parameter->typesFromSignature) . "'
+            "Method '$class->name::$stubMethod->name' with @since '$sinceVersion'  
+                has nullable parameter '$parameter->name' with typehint '" . implode('|', $parameter->typesFromSignature) . "' 
                 but nullable typehints available only since php 7.1");
     }
 
@@ -160,8 +152,8 @@ class StubsTypeHintsTest extends TestCase
     {
         $sinceVersion = Utils::getDeclaredSinceVersion($stubMethod);
         self::assertLessThan(2, count($parameter->typesFromSignature),
-            "Method '$class->name::$stubMethod->name' with @since '$sinceVersion'
-                has parameter '$parameter->name' with union typehint '" . implode('|', $parameter->typesFromSignature) . "'
+            "Method '$class->name::$stubMethod->name' with @since '$sinceVersion'  
+                has parameter '$parameter->name' with union typehint '" . implode('|', $parameter->typesFromSignature) . "' 
                 but union typehints available only since php 8.0");
     }
 
@@ -188,7 +180,7 @@ class StubsTypeHintsTest extends TestCase
         $returnTypes = $stubMethod->returnTypesFromSignature;
         self::assertEmpty(array_filter($returnTypes, fn(string $type) => str_contains($type, '?')),
             "Method '$stubMethod->parentName::$stubMethod->name' has since version '$sinceVersion'
-            but has nullable return typehint '" . implode('|', $returnTypes) . "' that supported only since PHP 7.1.
+            but has nullable return typehint '" . implode('|', $returnTypes) . "' that supported only since PHP 7.1. 
             Please declare return type via PhpDoc");
     }
 
@@ -202,7 +194,7 @@ class StubsTypeHintsTest extends TestCase
         $sinceVersion = Utils::getDeclaredSinceVersion($stubMethod);
         self::assertLessThan(2, count($stubMethod->returnTypesFromSignature),
             "Method '$stubMethod->parentName::$stubMethod->name' has since version '$sinceVersion'
-            but has union return typehint '" . implode('|', $stubMethod->returnTypesFromSignature) . "' that supported only since PHP 8.0.
+            but has union return typehint '" . implode('|', $stubMethod->returnTypesFromSignature) . "' that supported only since PHP 8.0. 
             Please declare return type via PhpDoc");
     }
 

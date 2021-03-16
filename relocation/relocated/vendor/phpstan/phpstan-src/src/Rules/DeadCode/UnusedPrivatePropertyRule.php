@@ -118,7 +118,7 @@ class UnusedPrivatePropertyRule implements \TenantCloud\BetterReflection\Relocat
                 if (!$fetch->class instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Name) {
                     continue;
                 }
-                $fetchedOnType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($usage->getScope()->resolveName($fetch->class));
+                $fetchedOnType = $usage->getScope()->resolveTypeByName($fetch->class);
             }
             if ($classType->isSuperTypeOf($fetchedOnType)->no()) {
                 continue;

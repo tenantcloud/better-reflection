@@ -12,7 +12,6 @@ use PhpParser\Node\Scalar\DNumber;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Scalar\String_;
 use PHPUnit\Framework\Exception;
-use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use StubTests\Model\PHPClass;
 use StubTests\Model\PHPConst;
@@ -25,17 +24,9 @@ use StubTests\Model\StubProblemType;
 use StubTests\Parsers\Utils;
 use StubTests\TestData\Providers\EntitiesFilter;
 use StubTests\TestData\Providers\PhpStormStubsSingleton;
-use StubTests\TestData\Providers\ReflectionStubsSingleton;
 
-class StubsTest extends TestCase
+class StubsTest extends BaseStubsTest
 {
-    public static function setUpBeforeClass(): void
-    {
-        parent::setUpBeforeClass();
-        PhpStormStubsSingleton::getPhpStormStubs();
-        ReflectionStubsSingleton::getReflectionStubs();
-    }
-
     /**
      * @dataProvider \StubTests\TestData\Providers\Reflection\ReflectionConstantsProvider::constantProvider
      * @throws Exception
@@ -110,6 +101,27 @@ class StubsTest extends TestCase
     }
 
     /**
+     * @dataProvider \StubTests\TestData\Providers\Reflection\ReflectionConstantsProvider::classConstantProvider
+     * @throws RuntimeException
+     */
+    public function testClassConstantsVisibility(PHPClass|PHPInterface $class, PHPConst $constant): void
+    {
+        $constantName = $constant->name;
+        $constantVisibility = $constant->visibility;
+        if ($class instanceof PHPClass) {
+            $stubConstants = PhpStormStubsSingleton::getPhpStormStubs()->getClass($class->name)->constants;
+        } else {
+            $stubConstants = PhpStormStubsSingleton::getPhpStormStubs()->getInterface($class->name)->constants;
+        }
+        static::assertEquals(
+            $constantVisibility,
+            $stubConstants[$constantName]->visibility,
+            "Constant visibility mismatch: const $constantName \n
+            Expected visibility: $constantVisibility but was {$stubConstants[$constantName]->visibility}"
+        );
+    }
+
+    /**
      * @dataProvider \StubTests\TestData\Providers\Reflection\ReflectionFunctionsProvider::allFunctionsProvider
      * @throws Exception
      */
@@ -147,7 +159,7 @@ class StubsTest extends TestCase
         static::assertSameSize(
             $function->parameters,
             $phpstormFunction->parameters,
-            "Parameter number mismatch for function $functionName.
+            "Parameter number mismatch for function $functionName. 
                 Expected: " . self::getParameterRepresentation($function)
         );
     }
@@ -374,7 +386,7 @@ class StubsTest extends TestCase
         static::assertSameSize(
             $method->parameters,
             $stubMethod->parameters,
-            "Parameter number mismatch for method $className::$method->name.
+            "Parameter number mismatch for method $className::$method->name. 
                         Expected: " . self::getParameterRepresentation($method)
         );
     }

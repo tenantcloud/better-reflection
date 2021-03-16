@@ -3,16 +3,20 @@
 declare (strict_types=1);
 namespace TenantCloud\BetterReflection\Relocated\PHPStan\Type;
 
+use TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\OutOfClassScope;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Broker\Broker;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ConstantReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection;
-use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ObjectTypeMethodReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Php\UniversalObjectCratesClassReflectionExtension;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\TrivialParametersAcceptor;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\CalledOnTypeUnresolvedMethodPrototypeReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\CalledOnTypeUnresolvedPropertyPrototypeReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedMethodPrototypeReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedPropertyPrototypeReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Constant\ConstantArrayType;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Constant\ConstantBooleanType;
@@ -28,7 +32,6 @@ class ObjectType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type
     private string $className;
     private ?\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $subtractedType;
     private ?\TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassReflection $classReflection;
-    private ?\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\GenericObjectType $genericObjectType = null;
     /** @var array<string, array<string, \PHPStan\TrinaryLogic>> */
     private static array $superTypes = [];
     public function __construct(string $className, ?\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $subtractedType = null, ?\TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassReflection $classReflection = null)
@@ -67,12 +70,42 @@ class ObjectType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type
     }
     public function getProperty(string $propertyName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection
     {
-        $classReflection = $this->getClassReflection();
+        return $this->getUnresolvedPropertyPrototype($propertyName, $scope)->getTransformedProperty();
+    }
+    public function getUnresolvedPropertyPrototype(string $propertyName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedPropertyPrototypeReflection
+    {
+        $nakedClassReflection = $this->getNakedClassReflection();
+        if ($nakedClassReflection === null) {
+            throw new \TenantCloud\BetterReflection\Relocated\PHPStan\Broker\ClassNotFoundException($this->className);
+        }
+        if (!$nakedClassReflection->hasProperty($propertyName)) {
+            $nakedClassReflection = $this->getClassReflection();
+        }
+        if ($nakedClassReflection === null) {
+            throw new \TenantCloud\BetterReflection\Relocated\PHPStan\Broker\ClassNotFoundException($this->className);
+        }
+        $property = $nakedClassReflection->getProperty($propertyName, $scope);
+        $ancestor = $this->getAncestorWithClassName($property->getDeclaringClass()->getName());
+        $resolvedClassReflection = null;
+        if ($ancestor !== null) {
+            $resolvedClassReflection = $ancestor->getClassReflection();
+        }
+        if ($resolvedClassReflection === null) {
+            $resolvedClassReflection = $property->getDeclaringClass();
+        }
+        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\CalledOnTypeUnresolvedPropertyPrototypeReflection($property, $resolvedClassReflection, \true, $this);
+    }
+    public function getPropertyWithoutTransformingStatic(string $propertyName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection
+    {
+        $classReflection = $this->getNakedClassReflection();
         if ($classReflection === null) {
             throw new \TenantCloud\BetterReflection\Relocated\PHPStan\Broker\ClassNotFoundException($this->className);
         }
-        if ($classReflection->isGeneric() && static::class === self::class) {
-            return $this->getGenericObjectType()->getProperty($propertyName, $scope);
+        if (!$classReflection->hasProperty($propertyName)) {
+            $classReflection = $this->getClassReflection();
+        }
+        if ($classReflection === null) {
+            throw new \TenantCloud\BetterReflection\Relocated\PHPStan\Broker\ClassNotFoundException($this->className);
         }
         return $classReflection->getProperty($propertyName, $scope);
     }
@@ -268,7 +301,7 @@ class ObjectType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type
             return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ErrorType();
         }
         if ($classReflection->hasNativeMethod('__toString')) {
-            return \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectSingle($classReflection->getNativeMethod('__toString')->getVariants())->getReturnType();
+            return \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectSingle($this->getMethod('__toString', new \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\OutOfClassScope())->getVariants())->getReturnType();
         }
         return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ErrorType();
     }
@@ -338,25 +371,30 @@ class ObjectType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type
     }
     public function getMethod(string $methodName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection
     {
-        $classReflection = $this->getClassReflection();
-        if ($classReflection === null) {
+        return $this->getUnresolvedMethodPrototype($methodName, $scope)->getTransformedMethod();
+    }
+    public function getUnresolvedMethodPrototype(string $methodName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedMethodPrototypeReflection
+    {
+        $nakedClassReflection = $this->getNakedClassReflection();
+        if ($nakedClassReflection === null) {
             throw new \TenantCloud\BetterReflection\Relocated\PHPStan\Broker\ClassNotFoundException($this->className);
         }
-        if ($classReflection->isGeneric() && static::class === self::class) {
-            return $this->getGenericObjectType()->getMethod($methodName, $scope);
+        if (!$nakedClassReflection->hasMethod($methodName)) {
+            $nakedClassReflection = $this->getClassReflection();
         }
-        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ObjectTypeMethodReflection($this, $classReflection->getMethod($methodName, $scope));
-    }
-    private function getGenericObjectType() : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\GenericObjectType
-    {
-        $classReflection = $this->getClassReflection();
-        if ($classReflection === null || !$classReflection->isGeneric()) {
-            throw new \TenantCloud\BetterReflection\Relocated\PHPStan\ShouldNotHappenException();
+        if ($nakedClassReflection === null) {
+            throw new \TenantCloud\BetterReflection\Relocated\PHPStan\Broker\ClassNotFoundException($this->className);
         }
-        if ($this->genericObjectType === null) {
-            $this->genericObjectType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\GenericObjectType($this->className, \array_values($classReflection->getTemplateTypeMap()->resolveToBounds()->getTypes()), $this->subtractedType);
+        $method = $nakedClassReflection->getMethod($methodName, $scope);
+        $ancestor = $this->getAncestorWithClassName($method->getDeclaringClass()->getName());
+        $resolvedClassReflection = null;
+        if ($ancestor !== null) {
+            $resolvedClassReflection = $ancestor->getClassReflection();
         }
-        return $this->genericObjectType;
+        if ($resolvedClassReflection === null) {
+            $resolvedClassReflection = $method->getDeclaringClass();
+        }
+        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\CalledOnTypeUnresolvedMethodPrototypeReflection($method, $resolvedClassReflection, \true, $this);
     }
     public function canAccessConstants() : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
     {
@@ -393,11 +431,11 @@ class ObjectType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type
             return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ErrorType();
         }
         if ($this->isInstanceOf(\Iterator::class)->yes()) {
-            return \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectSingle($classReflection->getNativeMethod('key')->getVariants())->getReturnType();
+            return \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectSingle($this->getMethod('key', new \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\OutOfClassScope())->getVariants())->getReturnType();
         }
         if ($this->isInstanceOf(\IteratorAggregate::class)->yes()) {
-            $keyType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\RecursionGuard::run($this, static function () use($classReflection) : Type {
-                return \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectSingle($classReflection->getNativeMethod('getIterator')->getVariants())->getReturnType()->getIterableKeyType();
+            $keyType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\RecursionGuard::run($this, function () : Type {
+                return \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectSingle($this->getMethod('getIterator', new \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\OutOfClassScope())->getVariants())->getReturnType()->getIterableKeyType();
             });
             if (!$keyType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType || $keyType->isExplicitMixed()) {
                 return $keyType;
@@ -419,11 +457,11 @@ class ObjectType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type
             return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ErrorType();
         }
         if ($this->isInstanceOf(\Iterator::class)->yes()) {
-            return \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectSingle($classReflection->getNativeMethod('current')->getVariants())->getReturnType();
+            return \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectSingle($this->getMethod('current', new \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\OutOfClassScope())->getVariants())->getReturnType();
         }
         if ($this->isInstanceOf(\IteratorAggregate::class)->yes()) {
-            $valueType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\RecursionGuard::run($this, static function () use($classReflection) : Type {
-                return \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectSingle($classReflection->getNativeMethod('getIterator')->getVariants())->getReturnType()->getIterableValueType();
+            $valueType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\RecursionGuard::run($this, function () : Type {
+                return \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectSingle($this->getMethod('getIterator', new \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\OutOfClassScope())->getVariants())->getReturnType()->getIterableValueType();
             });
             if (!$valueType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType || $valueType->isExplicitMixed()) {
                 return $valueType;
@@ -479,8 +517,8 @@ class ObjectType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type
             return \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic::createNo();
         }
         if ($this->isInstanceOf(\ArrayAccess::class)->yes()) {
-            $acceptedOffsetType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\RecursionGuard::run($this, function () use($classReflection) : Type {
-                $parameters = \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectSingle($classReflection->getNativeMethod('offsetSet')->getVariants())->getParameters();
+            $acceptedOffsetType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\RecursionGuard::run($this, function () : Type {
+                $parameters = \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectSingle($this->getMethod('offsetSet', new \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\OutOfClassScope())->getVariants())->getParameters();
                 if (\count($parameters) < 2) {
                     throw new \TenantCloud\BetterReflection\Relocated\PHPStan\ShouldNotHappenException(\sprintf('Method %s::%s() has less than 2 parameters.', $this->className, 'offsetSet'));
                 }
@@ -504,8 +542,8 @@ class ObjectType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type
             return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType();
         }
         if ($this->isInstanceOf(\ArrayAccess::class)->yes()) {
-            return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\RecursionGuard::run($this, static function () use($classReflection) : Type {
-                return \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectSingle($classReflection->getNativeMethod('offsetGet')->getVariants())->getReturnType();
+            return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\RecursionGuard::run($this, function () : Type {
+                return \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectSingle($this->getMethod('offsetGet', new \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\OutOfClassScope())->getVariants())->getReturnType();
             });
         }
         return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ErrorType();
@@ -521,8 +559,8 @@ class ObjectType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type
                 return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ErrorType();
             }
             $acceptedValueType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\NeverType();
-            $acceptedOffsetType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\RecursionGuard::run($this, function () use($classReflection, &$acceptedValueType) : Type {
-                $parameters = \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectSingle($classReflection->getNativeMethod('offsetSet')->getVariants())->getParameters();
+            $acceptedOffsetType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\RecursionGuard::run($this, function () use(&$acceptedValueType) : Type {
+                $parameters = \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector::selectSingle($this->getMethod('offsetSet', new \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\OutOfClassScope())->getVariants())->getParameters();
                 if (\count($parameters) < 2) {
                     throw new \TenantCloud\BetterReflection\Relocated\PHPStan\ShouldNotHappenException(\sprintf('Method %s::%s() has less than 2 parameters.', $this->className, 'offsetSet'));
                 }
@@ -576,7 +614,7 @@ class ObjectType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type
             return [new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\TrivialParametersAcceptor()];
         }
         if ($classReflection->hasNativeMethod('__invoke')) {
-            return $classReflection->getNativeMethod('__invoke')->getVariants();
+            return $this->getMethod('__invoke', new \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\OutOfClassScope())->getVariants();
         }
         if (!$classReflection->getNativeReflection()->isFinal()) {
             return [new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\TrivialParametersAcceptor()];
@@ -636,6 +674,18 @@ class ObjectType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type
         }
         return $this;
     }
+    public function getNakedClassReflection() : ?\TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassReflection
+    {
+        if ($this->classReflection !== null) {
+            return $this->classReflection;
+        }
+        $broker = \TenantCloud\BetterReflection\Relocated\PHPStan\Broker\Broker::getInstance();
+        if (!$broker->hasClass($this->className)) {
+            return null;
+        }
+        $this->classReflection = $broker->getClass($this->className);
+        return $this->classReflection;
+    }
     public function getClassReflection() : ?\TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassReflection
     {
         if ($this->classReflection !== null) {
@@ -655,7 +705,7 @@ class ObjectType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type
      * @param string $className
      * @return self|null
      */
-    public function getAncestorWithClassName(string $className) : ?\TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType
+    public function getAncestorWithClassName(string $className) : ?\TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeWithClassName
     {
         $broker = \TenantCloud\BetterReflection\Relocated\PHPStan\Broker\Broker::getInstance();
         if (!$broker->hasClass($className)) {

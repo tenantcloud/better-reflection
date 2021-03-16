@@ -8,7 +8,6 @@ use TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\Scope;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Rules\RuleErrorBuilder;
-use TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType;
 /**
  * @implements \PHPStan\Rules\Rule<\PhpParser\Node\Expr\StaticCall>
  */
@@ -65,7 +64,7 @@ class ImpossibleCheckTypeStaticMethodCallRule implements \TenantCloud\BetterRefl
     private function getMethod($class, string $methodName, \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\Scope $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection
     {
         if ($class instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Name) {
-            $calledOnType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($scope->resolveName($class));
+            $calledOnType = $scope->resolveTypeByName($class);
         } else {
             $calledOnType = $scope->getType($class);
         }

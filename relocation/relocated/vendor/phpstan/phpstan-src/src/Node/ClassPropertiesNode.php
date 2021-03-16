@@ -181,7 +181,7 @@ class ClassPropertiesNode extends \TenantCloud\BetterReflection\Relocated\PhpPar
                 if (!$methodCallNode->class instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Name) {
                     continue;
                 }
-                $calledOnType = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType($callScope->resolveName($methodCallNode->class));
+                $calledOnType = $callScope->resolveTypeByName($methodCallNode->class);
             }
             if ($classType->isSuperTypeOf($calledOnType)->no()) {
                 continue;

@@ -8,8 +8,8 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessA
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection;
-use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ResolvedMethodReflection;
-use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ResolvedPropertyReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedMethodPrototypeReflection;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedPropertyPrototypeReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\CompoundType;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\ErrorType;
@@ -151,25 +151,21 @@ class GenericObjectType extends \TenantCloud\BetterReflection\Relocated\PHPStan\
     }
     public function getProperty(string $propertyName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection
     {
-        $reflection = parent::getProperty($propertyName, $scope);
-        $ancestor = $this->getAncestorWithClassName($reflection->getDeclaringClass()->getName());
-        if ($ancestor === null) {
-            $classReflection = $reflection->getDeclaringClass();
-        } else {
-            $classReflection = $ancestor->getClassReflection();
-        }
-        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ResolvedPropertyReflection($reflection, $classReflection->getActiveTemplateTypeMap());
+        return $this->getUnresolvedPropertyPrototype($propertyName, $scope)->getTransformedProperty();
+    }
+    public function getUnresolvedPropertyPrototype(string $propertyName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedPropertyPrototypeReflection
+    {
+        $prototype = parent::getUnresolvedPropertyPrototype($propertyName, $scope);
+        return $prototype->doNotResolveTemplateTypeMapToBounds();
     }
     public function getMethod(string $methodName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection
     {
-        $reflection = parent::getMethod($methodName, $scope);
-        $ancestor = $this->getAncestorWithClassName($reflection->getDeclaringClass()->getName());
-        if ($ancestor === null) {
-            $classReflection = $reflection->getDeclaringClass();
-        } else {
-            $classReflection = $ancestor->getClassReflection();
-        }
-        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ResolvedMethodReflection($reflection, $classReflection->getActiveTemplateTypeMap());
+        return $this->getUnresolvedMethodPrototype($methodName, $scope)->getTransformedMethod();
+    }
+    public function getUnresolvedMethodPrototype(string $methodName, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ClassMemberAccessAnswerer $scope) : \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Type\UnresolvedMethodPrototypeReflection
+    {
+        $prototype = parent::getUnresolvedMethodPrototype($methodName, $scope);
+        return $prototype->doNotResolveTemplateTypeMapToBounds();
     }
     public function inferTemplateTypes(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $receivedType) : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap
     {

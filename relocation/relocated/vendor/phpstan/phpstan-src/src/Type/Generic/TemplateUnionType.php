@@ -7,29 +7,23 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType;
 final class TemplateUnionType extends \TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType implements \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType
 {
+    /** @use TemplateTypeTrait<UnionType> */
     use TemplateTypeTrait;
-    /**
-     * @param Type[] $types
-     */
-    public function __construct(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeScope $scope, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeStrategy $templateTypeStrategy, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeVariance $templateTypeVariance, array $types, string $name)
+    public function __construct(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeScope $scope, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeStrategy $templateTypeStrategy, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeVariance $templateTypeVariance, string $name, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType $bound)
     {
-        parent::__construct($types);
+        parent::__construct($bound->getTypes());
         $this->scope = $scope;
         $this->strategy = $templateTypeStrategy;
         $this->variance = $templateTypeVariance;
         $this->name = $name;
-        $this->bound = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType($types);
+        $this->bound = $bound;
     }
-    public function toArgument() : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType
+    public function traverse(callable $cb) : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type
     {
-        return new self($this->scope, new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeArgumentStrategy(), $this->variance, $this->getTypes(), $this->name);
-    }
-    /**
-     * @param mixed[] $properties
-     * @return Type
-     */
-    public static function __set_state(array $properties) : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type
-    {
-        return new self($properties['scope'], $properties['strategy'], $properties['variance'], $properties['types'], $properties['name']);
+        $newBound = $cb($this->getBound());
+        if ($this->getBound() !== $newBound && $newBound instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType) {
+            return new self($this->scope, $this->strategy, $this->variance, $this->name, $newBound);
+        }
+        return $this;
     }
 }

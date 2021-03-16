@@ -66,7 +66,6 @@ class IntersectionTypeMethodReflection implements \TenantCloud\BetterReflection\
     }
     public function getVariants() : array
     {
-        $variants = $this->methods[0]->getVariants();
         $returnType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeCombinator::intersect(...\array_map(static function (\TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\MethodReflection $method) : Type {
             return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeCombinator::intersect(...\array_map(static function (\TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptor $acceptor) : Type {
                 return $acceptor->getReturnType();
@@ -74,7 +73,7 @@ class IntersectionTypeMethodReflection implements \TenantCloud\BetterReflection\
         }, $this->methods));
         return \array_map(static function (\TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptor $acceptor) use($returnType) : ParametersAcceptor {
             return new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\FunctionVariant($acceptor->getTemplateTypeMap(), $acceptor->getResolvedTemplateTypeMap(), $acceptor->getParameters(), $acceptor->isVariadic(), $returnType);
-        }, $variants);
+        }, $this->methods[0]->getVariants());
     }
     public function isDeprecated() : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
     {

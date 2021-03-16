@@ -66,4 +66,12 @@ class BenevolentUnionType extends \TenantCloud\BetterReflection\Relocated\PHPSta
         }
         return $this;
     }
+    /**
+     * @param mixed[] $properties
+     * @return Type
+     */
+    public static function __set_state(array $properties) : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type
+    {
+        return new self($properties['types']);
+    }
 }

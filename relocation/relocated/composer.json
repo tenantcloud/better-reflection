@@ -3,7 +3,7 @@
     "require": {
         "nette\/bootstrap": "3.0.2",
         "nette\/neon": "v3.2.x-dev",
-        "phpstan\/phpstan-src": "dev-master#0725f5a71113e399e077bf9ae038467e69c1e0bc"
+        "phpstan\/phpstan-src": "dev-master#5b2601e89014dabb51cb2616af0ad54eb008eaf3"
     },
     "repositories": [
         {
