@@ -63,13 +63,13 @@ final class Resolver implements \TenantCloud\BetterReflection\Relocated\React\Dn
                 default:
                     $message = 'Unknown error response code ' . $code;
             }
-            throw new \TenantCloud\BetterReflection\Relocated\React\Dns\RecordNotFoundException('DNS query for ' . $query->name . ' returned an error response (' . $message . ')', $code);
+            throw new \TenantCloud\BetterReflection\Relocated\React\Dns\RecordNotFoundException('DNS query for ' . $query->describe() . ' returned an error response (' . $message . ')', $code);
         }
         $answers = $response->answers;
         $addresses = $this->valuesByNameAndType($answers, $query->name, $query->type);
         // reject if we did not receive a valid answer (domain is valid, but no record for this type could be found)
         if (0 === \count($addresses)) {
-            throw new \TenantCloud\BetterReflection\Relocated\React\Dns\RecordNotFoundException('DNS query for ' . $query->name . ' did not return a valid answer (NOERROR / NODATA)');
+            throw new \TenantCloud\BetterReflection\Relocated\React\Dns\RecordNotFoundException('DNS query for ' . $query->describe() . ' did not return a valid answer (NOERROR / NODATA)');
         }
         return \array_values($addresses);
     }

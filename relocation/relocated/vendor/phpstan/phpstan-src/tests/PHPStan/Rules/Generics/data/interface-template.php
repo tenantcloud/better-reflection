@@ -15,7 +15,7 @@ interface Bar
 {
 }
 /**
- * @template T of int
+ * @template T of float
  */
 interface Baz
 {
@@ -24,5 +24,13 @@ interface Baz
  * @template TypeAlias
  */
 interface Lorem
+{
+}
+/** @template T */
+interface NormalT
+{
+}
+/** @template T of NormalT<\stdClass>|\stdClass */
+interface UnionBound
 {
 }

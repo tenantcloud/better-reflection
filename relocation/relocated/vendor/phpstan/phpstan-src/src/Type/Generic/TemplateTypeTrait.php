@@ -65,7 +65,7 @@ trait TemplateTypeTrait
     }
     public function equals(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type) : bool
     {
-        return $type instanceof self && $type->scope->equals($this->scope) && $type->name === $this->name && $this->bound->equals($type);
+        return $type instanceof self && $type->scope->equals($this->scope) && $type->name === $this->name && $this->bound->equals($type->bound);
     }
     public function isAcceptedBy(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $acceptingType, bool $strictTypes) : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
     {
@@ -84,8 +84,8 @@ trait TemplateTypeTrait
     }
     public function isSubTypeOf(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type) : \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic
     {
-        $boundClass = \get_class($this->getBound());
-        if (!$type instanceof $boundClass && ($type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType || $type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntersectionType)) {
+        $bound = $this->getBound();
+        if (!$type instanceof $bound && !$this instanceof $type && !$type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType && ($type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType || $type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\IntersectionType)) {
             return $type->isSuperTypeOf($this);
         }
         if (!$type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType) {
@@ -107,10 +107,12 @@ trait TemplateTypeTrait
         if ($receivedType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType && $this->getBound()->isSuperTypeOf($receivedType->getBound())->yes()) {
             return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap([$this->name => $receivedType]);
         }
-        if ($this->getBound()->isSuperTypeOf($receivedType)->yes()) {
-            return new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap([$this->name => \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeHelper::generalizeType($receivedType)]);
+        $map = $this->getBound()->inferTemplateTypes($receivedType);
+        $resolvedBound = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeHelper::resolveTemplateTypes($this->getBound(), $map);
+        if ($resolvedBound->isSuperTypeOf($receivedType)->yes()) {
+            return (new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap([$this->name => $this->shouldGeneralizeInferredType() ? \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeHelper::generalizeType($receivedType) : $receivedType]))->union($map);
         }
-        return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap::createEmpty();
+        return $map;
     }
     public function getReferencedTemplateTypes(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeVariance $positionVariance) : array
     {
@@ -119,5 +121,9 @@ trait TemplateTypeTrait
     public function getVariance() : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeVariance
     {
         return $this->variance;
+    }
+    protected function shouldGeneralizeInferredType() : bool
+    {
+        return \true;
     }
 }

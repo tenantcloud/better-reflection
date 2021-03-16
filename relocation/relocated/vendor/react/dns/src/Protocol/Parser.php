@@ -222,7 +222,13 @@ final class Parser
             return \addcslashes($label, "\0.. .");
         }, $labels)), $consumed);
     }
-    private function readLabels($data, $consumed)
+    /**
+     * @param string $data
+     * @param int    $consumed
+     * @param int    $compressionDepth maximum depth for compressed labels to avoid unreasonable recursion
+     * @return array
+     */
+    private function readLabels($data, $consumed, $compressionDepth = 127)
     {
         $labels = array();
         while (\true) {
@@ -236,13 +242,13 @@ final class Parser
                 break;
             }
             // first two bits set? this is a compressed label (14 bit pointer offset)
-            if (($length & 0xc0) === 0xc0 && isset($data[$consumed + 1])) {
+            if (($length & 0xc0) === 0xc0 && isset($data[$consumed + 1]) && $compressionDepth) {
                 $offset = ($length & ~0xc0) << 8 | \ord($data[$consumed + 1]);
                 if ($offset >= $consumed) {
                     return array(null, null);
                 }
                 $consumed += 2;
-                list($newLabels) = $this->readLabels($data, $offset);
+                list($newLabels) = $this->readLabels($data, $offset, $compressionDepth - 1);
                 if ($newLabels === null) {
                     return array(null, null);
                 }

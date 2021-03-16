@@ -2,6 +2,7 @@
 
 namespace TenantCloud\BetterReflection\Reflection;
 
+use TenantCloud\BetterReflection\Reflection\Attributes\AttributeSequence;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type;
 
 /**

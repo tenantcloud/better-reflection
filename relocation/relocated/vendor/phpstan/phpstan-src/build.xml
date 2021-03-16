@@ -4,6 +4,7 @@
 			  value="tmp/composer-require-checker-2.1.0.phar"/>
 	<property name="url.composer-require-checker"
 			  value="https://github.com/maglnet/ComposerRequireChecker/releases/download/2.1.0/composer-require-checker.phar"/>
+	<property name="phpstan.config" value="phpstan.neon"/>
 	<if>
 		<and>
 			<not><os family="windows"/></not>
@@ -16,8 +17,6 @@
 			<property name="phpunit.executable" value="vendor/bin/phpunit"/>
 		</else>
 	</if>
-	<php expression="PHP_VERSION_ID &gt;= 70400 ?'true':'false'" returnProperty="isPHP74" level="verbose" />
-	<php expression="PHP_VERSION_ID &gt;= 80000 ?'true':'false'" returnProperty="isPHP80" level="verbose" />
 	<target name="check" depends="
 		composer-validate,
 		composer-install,
@@ -146,57 +145,22 @@
 	</target>
 
 	<target name="cs">
-		<if>
-			<equals arg1="${isPHP74}" arg2="true" />
-			<then>
-				<exec
-					executable="composer"
-					logoutput="true"
-					passthru="true"
-					checkreturn="true"
-				>
-					<arg value="install"/>
-					<arg value="--working-dir"/>
-					<arg path="build-cs"/>
-					<arg value="--ansi"/>
-				</exec>
-				<exec
-					executable="build-cs/vendor/bin/phpcs"
-					logoutput="true"
-					passthru="true"
-					checkreturn="true"
-				>
-					<arg value="--colors"/>
-					<arg value="--extensions=php"/>
-					<arg value="--encoding=utf-8"/>
-					<arg value="--tab-width=4"/>
-					<arg value="--cache=tmp/cache/phpcs"/>
-					<arg value="--ignore=tests/*/data,tests/*/traits,tests/notAutoloaded,tests/*/cache,src/Reflection/SignatureMap/functionMap.php,tests/e2e/magic-setter,tests/e2e/anon-class"/>
-					<arg value="-sp"/>
-					<arg path="src"/>
-					<arg path="tests"/>
-					<arg path="compiler/src" />
-				</exec>
-			</then>
-		</if>
+		<exec
+			executable="vendor/bin/phpcs"
+			logoutput="true"
+			passthru="true"
+			checkreturn="true"
+		>
+		</exec>
 	</target>
 
 	<target name="cs-fix">
 		<exec
-				executable="build-cs/vendor/bin/phpcbf"
+				executable="vendor/bin/phpcbf"
 				logoutput="true"
 				passthru="true"
 				checkreturn="true"
 		>
-			<arg value="--colors"/>
-			<arg value="--extensions=php"/>
-			<arg value="--encoding=utf-8"/>
-			<arg value="--tab-width=4"/>
-			<arg value="--ignore=tests/*/data,tests/*/traits,tests/notAutoloaded,tests/*/cache,src/Reflection/SignatureMap/functionMap.php,tests/e2e/magic-setter,tests/e2e/anon-class"/>
-			<arg value="-sp"/>
-			<arg path="src"/>
-			<arg path="tests"/>
-			<arg path="compiler/src" />
 		</exec>
 	</target>
 
@@ -206,11 +170,14 @@
 
 	<target name="tests">
 		<exec
-				executable="${phpunit.executable}"
-				logoutput="true"
-				passthru="true"
-				checkreturn="true"
+			executable="php"
+			logoutput="true"
+			passthru="true"
+			checkreturn="true"
 		>
+			<arg value="-d"/>
+			<arg value="memory_limit=768M"/>
+			<arg path="${phpunit.executable}"/>
 			<arg value="-c"/>
 			<arg value="tests/phpunit.xml"/>
 			<arg path="tests/PHPStan"/>
@@ -219,11 +186,14 @@
 
 	<target name="tests-fast">
 		<exec
-			executable="${phpunit.executable}"
+			executable="php"
 			logoutput="true"
 			passthru="true"
 			checkreturn="true"
 		>
+			<arg value="-d"/>
+			<arg value="memory_limit=768M"/>
+			<arg path="${phpunit.executable}"/>
 			<arg value="-c"/>
 			<arg value="tests/phpunit.xml"/>
 			<arg value="--exclude-group"/>
@@ -234,11 +204,14 @@
 
 	<target name="tests-fast-static-reflection">
 		<exec
-			executable="${phpunit.executable}"
+			executable="php"
 			logoutput="true"
 			passthru="true"
 			checkreturn="true"
 		>
+			<arg value="-d"/>
+			<arg value="memory_limit=768M"/>
+			<arg path="${phpunit.executable}"/>
 			<arg value="-c"/>
 			<arg value="tests/phpunit.xml"/>
 			<arg value="--exclude-group"/>
@@ -250,39 +223,7 @@
 	</target>
 
 	<target name="phpstan">
-		<property name="phpstan.config" value="build/phpstan-generated.neon"/>
-		<touch file="${phpstan.config}"/>
-		<append
-			destFile="${phpstan.config}"
-			text="includes: [ phpstan.neon"
-			append="false"
-		></append>
-		<if>
-			<equals arg1="${isPHP74}" arg2="true" />
-			<then>
-				<append
-					destFile="${phpstan.config}"
-					text=", ignore-gte-php7.4-errors.neon"
-				></append>
-			</then>
-		</if>
-		<if>
-			<equals arg1="${isPHP80}" arg2="true" />
-			<then>
-				<append
-					destFile="${phpstan.config}"
-					text=", baseline-8.0.neon"
-				></append>
-			</then>
-		</if>
-		<append
-			destFile="${phpstan.config}"
-			text=", ignore-hoa.neon"
-		></append>
-		<append
-				destFile="${phpstan.config}"
-				text=" ]"
-		></append>
+		<delete file="${phpstan.config}"/>
 		<exec
 			executable="php"
 			logoutput="true"
@@ -291,8 +232,6 @@
 		>
 			<arg path="bin/phpstan"/>
 			<arg value="clear-result-cache"/>
-			<arg value="-c"/>
-			<arg path="${phpstan.config}"/>
 			<arg value="-q"/>
 		</exec>
 		<exec
@@ -304,50 +243,19 @@
 			<arg value="-d"/>
 			<arg value="memory_limit=768M"/>
 			<arg path="bin/phpstan"/>
-			<arg value="analyse"/>
-			<arg value="-c"/>
-			<arg path="${phpstan.config}"/>
-			<arg value="-l"/>
-			<arg value="8"/>
-			<arg path="build/PHPStan"/>
-			<arg path="src"/>
-			<arg path="tests"/>
 		</exec>
 	</target>
 
 	<target name="phpstan-static-reflection">
-		<property name="phpstan.config" value="build/phpstan-generated.neon"/>
 		<touch file="${phpstan.config}"/>
 		<append
 			destFile="${phpstan.config}"
-			text="includes: [ phpstan.neon"
+			text="includes: [ build/phpstan.neon"
 			append="false"
 		></append>
-		<if>
-			<equals arg1="${isPHP74}" arg2="true" />
-			<then>
-				<append
-					destFile="${phpstan.config}"
-					text=", ignore-gte-php7.4-errors.neon"
-				></append>
-			</then>
-		</if>
-		<if>
-			<equals arg1="${isPHP80}" arg2="true" />
-			<then>
-				<append
-					destFile="${phpstan.config}"
-					text=", baseline-8.0.neon"
-				></append>
-			</then>
-		</if>
 		<append
 			destFile="${phpstan.config}"
-			text=", ignore-hoa.neon"
-		></append>
-		<append
-			destFile="${phpstan.config}"
-			text=", ../conf/staticReflection.neon"
+			text=", conf/staticReflection.neon"
 		></append>
 		<append
 			destFile="${phpstan.config}"
@@ -374,51 +282,11 @@
 			<arg value="-d"/>
 			<arg value="memory_limit=768M"/>
 			<arg path="bin/phpstan"/>
-			<arg value="analyse"/>
-			<arg value="-c"/>
-			<arg path="${phpstan.config}"/>
-			<arg value="-l"/>
-			<arg value="8"/>
-			<arg path="build/PHPStan"/>
-			<arg path="src"/>
-			<arg path="tests"/>
 		</exec>
 	</target>
 
 	<target name="phpstan-result-cache">
-		<property name="phpstan.config" value="build/phpstan-generated.neon"/>
-		<touch file="${phpstan.config}"/>
-		<append
-			destFile="${phpstan.config}"
-			text="includes: [ phpstan.neon"
-			append="false"
-		></append>
-		<if>
-			<equals arg1="${isPHP74}" arg2="true" />
-			<then>
-				<append
-					destFile="${phpstan.config}"
-					text=", ignore-gte-php7.4-errors.neon"
-				></append>
-			</then>
-		</if>
-		<if>
-			<equals arg1="${isPHP80}" arg2="true" />
-			<then>
-				<append
-					destFile="${phpstan.config}"
-					text=", baseline-8.0.neon"
-				></append>
-			</then>
-		</if>
-		<append
-			destFile="${phpstan.config}"
-			text=", ignore-hoa.neon"
-		></append>
-		<append
-			destFile="${phpstan.config}"
-			text=" ]"
-		></append>
+		<delete file="${phpstan.config}"/>
 		<exec
 			executable="php"
 			logoutput="true"
@@ -428,14 +296,6 @@
 			<arg value="-d"/>
 			<arg value="memory_limit=768M"/>
 			<arg path="bin/phpstan"/>
-			<arg value="analyse"/>
-			<arg value="-c"/>
-			<arg path="${phpstan.config}"/>
-			<arg value="-l"/>
-			<arg value="8"/>
-			<arg path="build/PHPStan"/>
-			<arg path="src"/>
-			<arg path="tests"/>
 		</exec>
 	</target>
 
@@ -461,39 +321,7 @@
 	</target>
 
 	<target name="phpstan-pro">
-		<property name="phpstan.config" value="build/phpstan-generated.neon"/>
-		<touch file="${phpstan.config}"/>
-		<append
-			destFile="${phpstan.config}"
-			text="includes: [ phpstan.neon"
-			append="false"
-		></append>
-		<if>
-			<equals arg1="${isPHP74}" arg2="true" />
-			<then>
-				<append
-					destFile="${phpstan.config}"
-					text=", ignore-gte-php7.4-errors.neon"
-				></append>
-			</then>
-		</if>
-		<if>
-			<equals arg1="${isPHP80}" arg2="true" />
-			<then>
-				<append
-					destFile="${phpstan.config}"
-					text=", baseline-8.0.neon"
-				></append>
-			</then>
-		</if>
-		<append
-			destFile="${phpstan.config}"
-			text=", ignore-hoa.neon"
-		></append>
-		<append
-			destFile="${phpstan.config}"
-			text=" ]"
-		></append>
+		<delete file="${phpstan.config}"/>
 		<exec
 			executable="php"
 			logoutput="true"
@@ -503,52 +331,12 @@
 			<arg value="-d"/>
 			<arg value="memory_limit=1024M"/>
 			<arg path="bin/phpstan"/>
-			<arg value="analyse"/>
-			<arg value="-c"/>
-			<arg path="${phpstan.config}"/>
-			<arg value="-l"/>
-			<arg value="8"/>
 			<arg value="--pro"/>
-			<arg path="build/PHPStan"/>
-			<arg path="src"/>
-			<arg path="tests"/>
 		</exec>
 	</target>
 
 	<target name="phpstan-generate-baseline">
-		<property name="phpstan.config" value="build/phpstan-generated.neon"/>
-		<touch file="${phpstan.config}"/>
-		<append
-			destFile="${phpstan.config}"
-			text="includes: [ phpstan.neon"
-			append="false"
-		></append>
-		<if>
-			<equals arg1="${isPHP74}" arg2="true" />
-			<then>
-				<append
-					destFile="${phpstan.config}"
-					text=", ignore-gte-php7.4-errors.neon"
-				></append>
-			</then>
-		</if>
-		<if>
-			<equals arg1="${isPHP80}" arg2="true" />
-			<then>
-				<append
-					destFile="${phpstan.config}"
-					text=", baseline-8.0.neon"
-				></append>
-			</then>
-		</if>
-		<append
-			destFile="${phpstan.config}"
-			text=", ignore-hoa.neon"
-		></append>
-		<append
-			destFile="${phpstan.config}"
-			text=" ]"
-		></append>
+		<delete file="${phpstan.config}"/>
 		<exec
 			executable="php"
 			logoutput="true"
@@ -558,14 +346,6 @@
 			<arg value="-d"/>
 			<arg value="memory_limit=768M"/>
 			<arg path="bin/phpstan"/>
-			<arg value="analyse"/>
-			<arg value="-c"/>
-			<arg path="${phpstan.config}"/>
-			<arg value="-l"/>
-			<arg value="8"/>
-			<arg path="build/PHPStan"/>
-			<arg path="src"/>
-			<arg path="tests"/>
 			<arg value="--generate-baseline"/>
 			<arg value="-vvv"/>
 		</exec>

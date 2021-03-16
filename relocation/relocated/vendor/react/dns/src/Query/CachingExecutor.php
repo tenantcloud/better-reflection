@@ -46,7 +46,7 @@ final class CachingExecutor implements \TenantCloud\BetterReflection\Relocated\R
                 $pending = null;
             });
         }, function ($_, $reject) use(&$pending, $query) {
-            $reject(new \RuntimeException('DNS query for ' . $query->name . ' has been cancelled'));
+            $reject(new \RuntimeException('DNS query for ' . $query->describe() . ' has been cancelled'));
             $pending->cancel();
             $pending = null;
         });

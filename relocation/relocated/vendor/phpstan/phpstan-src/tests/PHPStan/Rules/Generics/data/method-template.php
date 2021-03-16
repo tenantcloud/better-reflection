@@ -34,7 +34,7 @@ class Bar
 class Baz
 {
     /**
-     * @template T of int
+     * @template T of float
      */
     public function doFoo()
     {

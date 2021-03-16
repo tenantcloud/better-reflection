@@ -19,7 +19,7 @@ final class TimeoutExecutor implements \TenantCloud\BetterReflection\Relocated\R
     {
         return \TenantCloud\BetterReflection\Relocated\React\Promise\Timer\timeout($this->executor->query($query), $this->timeout, $this->loop)->then(null, function ($e) use($query) {
             if ($e instanceof \TenantCloud\BetterReflection\Relocated\React\Promise\Timer\TimeoutException) {
-                $e = new \TenantCloud\BetterReflection\Relocated\React\Dns\Query\TimeoutException(\sprintf("DNS query for %s timed out", $query->name), 0, $e);
+                $e = new \TenantCloud\BetterReflection\Relocated\React\Dns\Query\TimeoutException(\sprintf("DNS query for %s timed out", $query->describe()), 0, $e);
             }
             throw $e;
         });

@@ -3,32 +3,50 @@
 namespace Tests\TenantCloud\BetterReflection\PHPStan;
 
 use Ds\Pair;
-use TenantCloud\BetterReflection\Delegation\PHPStan\DefaultReflectionProviderFactory;
 
 /**
  * @template T
  * @template-covariant S of int
+ *
+ * @extends ParentClassStub<T, SomeStub>
+ * @implements ParentInterfaceStub<T, SomeStub>
+ *
+ * @uses ParentTraitStub<T, SomeStub>
  */
 #[AttributeStub(something: '123')]
-class ClassStub
+final class ClassStub extends ParentClassStub implements ParentInterfaceStub
 {
-	/** @var DefaultReflectionProviderFactory[] */
+	use ParentTraitStub;
+
+	/** @var SomeStub[] */
 	#[AttributeStub('4')]
 	private array $factories;
 
-	/** @var DefaultReflectionProviderFactory<SomeStub, T> */
-	private DefaultReflectionProviderFactory $generic;
+	/** @var DoubleTemplateType<SomeStub, T> */
+	private DoubleTemplateType $generic;
 
 	/**
 	 * @template G
 	 *
-	 * @param DefaultReflectionProviderFactory<SomeStub, T> $param
+	 * @param DoubleTemplateType<SomeStub, T> $param
 	 *
 	 * @return Pair<S, G>
 	 */
 	#[AttributeStub('5')]
 	public function method(
-		#[AttributeStub('6')] DefaultReflectionProviderFactory $param
+		#[AttributeStub('6')] DoubleTemplateType $param
 	): Pair {
+	}
+
+	/**
+	 * @template KValue
+	 * @template K of SingleTemplateType<KValue>
+	 *
+	 * @param K $param
+	 *
+	 * @return KValue
+	 */
+	public function methodTwo(mixed $param): mixed
+	{
 	}
 }

@@ -76,7 +76,7 @@ final class CoopExecutor implements \TenantCloud\BetterReflection\Relocated\Reac
                 $promise->cancel();
                 $promise = null;
             }
-            throw new \RuntimeException('DNS query for ' . $query->name . ' has been cancelled');
+            throw new \RuntimeException('DNS query for ' . $query->describe() . ' has been cancelled');
         });
     }
     private function serializeQueryToIdentity(\TenantCloud\BetterReflection\Relocated\React\Dns\Query\Query $query)

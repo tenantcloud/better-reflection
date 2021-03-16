@@ -11,6 +11,7 @@ return function (\TenantCloud\BetterReflection\Relocated\Symfony\Component\Depen
     $containerConfigurator->import(\PRESET_DIR . '/php71.php');
     $parameters = $containerConfigurator->parameters();
     $parameters->set('skip', [
+        'fixtures*/*',
         // RemoteStream extends streamWrapper
         \TenantCloud\BetterReflection\Relocated\PHP_CodeSniffer\Standards\PSR1\Sniffs\Methods\CamelCapsMethodNameSniff::class => ['tests/Utils/FileSystem.phpt'],
         // use function

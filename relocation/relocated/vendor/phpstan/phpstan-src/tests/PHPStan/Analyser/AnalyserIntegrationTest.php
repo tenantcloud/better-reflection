@@ -278,6 +278,11 @@ class AnalyserIntegrationTest extends \TenantCloud\BetterReflection\Relocated\PH
         $errors = $this->runAnalyse(__DIR__ . '/../Rules/Generics/data/bug-3769.php');
         $this->assertCount(0, $errors);
     }
+    public function testBug3922() : void
+    {
+        $errors = $this->runAnalyse(__DIR__ . '/data/bug-3922-integration.php');
+        $this->assertCount(0, $errors);
+    }
     /**
      * @param string $file
      * @return \PHPStan\Analyser\Error[]

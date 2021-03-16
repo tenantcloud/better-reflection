@@ -15,11 +15,11 @@ class FunctionTemplateTypeRuleTest extends \TenantCloud\BetterReflection\Relocat
     protected function getRule() : \TenantCloud\BetterReflection\Relocated\PHPStan\Rules\Rule
     {
         $broker = $this->createReflectionProvider();
-        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Rules\Generics\FunctionTemplateTypeRule(self::getContainer()->getByType(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\FileTypeMapper::class), new \TenantCloud\BetterReflection\Relocated\PHPStan\Rules\Generics\TemplateTypeCheck($broker, new \TenantCloud\BetterReflection\Relocated\PHPStan\Rules\ClassCaseSensitivityCheck($broker), ['TypeAlias' => 'int'], \true));
+        return new \TenantCloud\BetterReflection\Relocated\PHPStan\Rules\Generics\FunctionTemplateTypeRule(self::getContainer()->getByType(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\FileTypeMapper::class), new \TenantCloud\BetterReflection\Relocated\PHPStan\Rules\Generics\TemplateTypeCheck($broker, new \TenantCloud\BetterReflection\Relocated\PHPStan\Rules\ClassCaseSensitivityCheck($broker), new \TenantCloud\BetterReflection\Relocated\PHPStan\Rules\Generics\GenericObjectTypeCheck(), ['TypeAlias' => 'int'], \true));
     }
     public function testRule() : void
     {
-        $this->analyse([__DIR__ . '/data/function-template.php'], [['PHPDoc tag @template for function FunctionTemplateType\\foo() cannot have existing class stdClass as its name.', 8], ['PHPDoc tag @template T for function FunctionTemplateType\\bar() has invalid bound type FunctionTemplateType\\Zazzzu.', 16], ['PHPDoc tag @template T for function FunctionTemplateType\\baz() with bound type int is not supported.', 24], ['PHPDoc tag @template for function FunctionTemplateType\\lorem() cannot have existing type alias TypeAlias as its name.', 32]]);
+        $this->analyse([__DIR__ . '/data/function-template.php'], [['PHPDoc tag @template for function FunctionTemplateType\\foo() cannot have existing class stdClass as its name.', 8], ['PHPDoc tag @template T for function FunctionTemplateType\\bar() has invalid bound type FunctionTemplateType\\Zazzzu.', 16], ['PHPDoc tag @template T for function FunctionTemplateType\\baz() with bound type float is not supported.', 24], ['PHPDoc tag @template for function FunctionTemplateType\\lorem() cannot have existing type alias TypeAlias as its name.', 32]]);
     }
     public function testBug3769() : void
     {

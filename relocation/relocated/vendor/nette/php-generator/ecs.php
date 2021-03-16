@@ -11,6 +11,7 @@ return function (\TenantCloud\BetterReflection\Relocated\Symfony\Component\Depen
     $containerConfigurator->import(\PRESET_DIR . '/php71.php');
     $parameters = $containerConfigurator->parameters();
     $parameters->set('skip', [
+        'fixtures*/*',
         // constant NULL, FALSE
         \TenantCloud\BetterReflection\Relocated\PhpCsFixer\Fixer\Casing\LowercaseConstantsFixer::class => ['src/PhpGenerator/Type.php'],
     ]);

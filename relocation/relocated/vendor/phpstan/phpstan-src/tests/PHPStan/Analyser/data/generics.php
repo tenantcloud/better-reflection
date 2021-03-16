@@ -197,7 +197,7 @@ function testArrayMap(array $listOfIntegers)
         \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\assertType('int', $int);
         return (string) $int;
     }, $listOfIntegers);
-    \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\assertType('array<string>', $strings);
+    \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\assertType('array<string&numeric>', $strings);
 }
 /**
  * @param int[] $listOfIntegers

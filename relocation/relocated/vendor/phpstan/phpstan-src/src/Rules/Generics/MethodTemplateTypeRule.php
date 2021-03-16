@@ -8,7 +8,6 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\Scope;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Rules\Rule;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Rules\RuleErrorBuilder;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\FileTypeMapper;
-use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeScope;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\VerbosityLevel;
 /**
  * @implements \PHPStan\Rules\Rule<\PhpParser\Node\Stmt\ClassMethod>
@@ -40,7 +39,7 @@ class MethodTemplateTypeRule implements \TenantCloud\BetterReflection\Relocated\
         $methodName = $node->name->toString();
         $resolvedPhpDoc = $this->fileTypeMapper->getResolvedPhpDoc($scope->getFile(), $className, $scope->isInTrait() ? $scope->getTraitReflection()->getName() : null, $methodName, $docComment->getText());
         $methodTemplateTags = $resolvedPhpDoc->getTemplateTags();
-        $messages = $this->templateTypeCheck->check($node, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeScope::createWithMethod($className, $methodName), $methodTemplateTags, \sprintf('PHPDoc tag @template for method %s::%s() cannot have existing class %%s as its name.', $className, $methodName), \sprintf('PHPDoc tag @template for method %s::%s() cannot have existing type alias %%s as its name.', $className, $methodName), \sprintf('PHPDoc tag @template %%s for method %s::%s() has invalid bound type %%s.', $className, $methodName), \sprintf('PHPDoc tag @template %%s for method %s::%s() with bound type %%s is not supported.', $className, $methodName));
+        $messages = $this->templateTypeCheck->check($node, $methodTemplateTags, \sprintf('PHPDoc tag @template for method %s::%s() cannot have existing class %%s as its name.', $className, $methodName), \sprintf('PHPDoc tag @template for method %s::%s() cannot have existing type alias %%s as its name.', $className, $methodName), \sprintf('PHPDoc tag @template %%s for method %s::%s() has invalid bound type %%s.', $className, $methodName), \sprintf('PHPDoc tag @template %%s for method %s::%s() with bound type %%s is not supported.', $className, $methodName));
         $classTemplateTypes = $classReflection->getTemplateTypeMap()->getTypes();
         foreach (\array_keys($methodTemplateTags) as $name) {
             if (!isset($classTemplateTypes[$name])) {

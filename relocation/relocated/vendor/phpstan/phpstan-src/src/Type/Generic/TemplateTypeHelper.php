@@ -18,12 +18,15 @@ class TemplateTypeHelper
     {
         return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeTraverser::map($type, static function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type, callable $traverse) use($standins) : Type {
             if ($type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType && !$type->isArgument()) {
-                $newType = $standins->getType($type->getName()) ?? $type;
+                $newType = $standins->getType($type->getName());
+                if ($newType === null) {
+                    return $traverse($type);
+                }
                 if ($newType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ErrorType) {
-                    $newType = $type->getBound();
+                    return $traverse($type->getBound());
                 }
                 if ($newType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\StaticType) {
-                    $newType = $newType->getStaticObjectType();
+                    return $traverse($newType->getStaticObjectType());
                 }
                 return $newType;
             }

@@ -1,5 +1,5 @@
 #!/usr/bin/env php
-<?php 
+<?php
 declare (strict_types=1);
 namespace TenantCloud\BetterReflection\Relocated;
 
@@ -66,6 +66,7 @@ use TenantCloud\BetterReflection\Relocated\Symfony\Component\Console\Helper\Prog
     } catch (\OutOfBoundsException $e) {
     }
     $application = new \TenantCloud\BetterReflection\Relocated\Symfony\Component\Console\Application('PHPStan - PHP Static Analysis Tool', $version);
+    $application->setDefaultCommand('analyse');
     \TenantCloud\BetterReflection\Relocated\Symfony\Component\Console\Helper\ProgressBar::setFormatDefinition('file_download', ' [%bar%] %percent:3s%% %fileSize%');
     $reversedComposerAutoloaderProjectPaths = \array_reverse($composerAutoloaderProjectPaths);
     $application->add(new \TenantCloud\BetterReflection\Relocated\PHPStan\Command\AnalyseCommand($reversedComposerAutoloaderProjectPaths));

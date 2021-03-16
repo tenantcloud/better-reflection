@@ -212,7 +212,7 @@ class FunctionDefinitionCheck
                     \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeTraverser::map($parameter->getType(), static function (\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $type, callable $traverse) use(&$templateTypes) : Type {
                         if ($type instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType) {
                             unset($templateTypes[$type->getName()]);
-                            return $type;
+                            return $traverse($type);
                         }
                         return $traverse($type);
                     });

@@ -77,4 +77,12 @@ class ReturnTypeRuleTest extends \TenantCloud\BetterReflection\Relocated\PHPStan
     {
         $this->analyse([__DIR__ . '/data/bug-4590.php'], [['Method Bug4590\\Controller::test1() should return Bug4590\\OkResponse<array<string, string>> but returns Bug4590\\OkResponse<array(\'ok\' => string)>.', 39], ['Method Bug4590\\Controller::test2() should return Bug4590\\OkResponse<array<int, string>> but returns Bug4590\\OkResponse<array(string)>.', 47], ['Method Bug4590\\Controller::test3() should return Bug4590\\OkResponse<array<string>> but returns Bug4590\\OkResponse<array(string)>.', 55]]);
     }
+    public function testTemplateStringBound() : void
+    {
+        $this->analyse([__DIR__ . '/data/template-string-bound.php'], []);
+    }
+    public function testBug4605() : void
+    {
+        $this->analyse([__DIR__ . '/data/bug-4605.php'], []);
+    }
 }

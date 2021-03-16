@@ -32,7 +32,7 @@ class StatementOrderVisitor extends \TenantCloud\BetterReflection\Relocated\PhpP
         $order = $this->orderStack[\count($this->orderStack) - 1];
         $node->setAttribute('statementOrder', $order);
         $node->setAttribute('statementDepth', $this->depth);
-        if ($node instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr && \count($this->expressionOrderStack) > 0) {
+        if (($node instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr || $node instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Arg) && \count($this->expressionOrderStack) > 0) {
             $expressionOrder = $this->expressionOrderStack[\count($this->expressionOrderStack) - 1];
             $node->setAttribute('expressionOrder', $expressionOrder);
             $node->setAttribute('expressionDepth', $this->expressionDepth);

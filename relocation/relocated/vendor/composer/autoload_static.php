@@ -24,7 +24,7 @@ class ComposerStaticInit18b0bd985af5f45a7de23e6011ab101e
     );
 
     public static $prefixLengthsPsr4 = array (
-        'T' => 
+        'T' =>
         array (
             'TenantCloud\\BetterReflection\\Relocated\\phpDocumentor\\Reflection\\' => 64,
             'TenantCloud\\BetterReflection\\Relocated\\Webmozart\\Assert\\' => 56,
@@ -62,7 +62,7 @@ class ComposerStaticInit18b0bd985af5f45a7de23e6011ab101e
             'TenantCloud\\BetterReflection\\Relocated\\Composer\\CaBundle\\' => 57,
             'TenantCloud\\BetterReflection\\Relocated\\Clue\\React\\NDJson\\' => 57,
         ),
-        'H' => 
+        'H' =>
         array (
             'Hoa\\Zformat\\' => 12,
             'Hoa\\Visitor\\' => 12,
@@ -81,197 +81,197 @@ class ComposerStaticInit18b0bd985af5f45a7de23e6011ab101e
     );
 
     public static $prefixDirsPsr4 = array (
-        'TenantCloud\\BetterReflection\\Relocated\\phpDocumentor\\Reflection\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\phpDocumentor\\Reflection\\' =>
         array (
             0 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
             1 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
             2 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\Webmozart\\Assert\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\Webmozart\\Assert\\' =>
         array (
             0 => __DIR__ . '/..' . '/webmozart/assert/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\Symfony\\Polyfill\\Php80\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\Symfony\\Polyfill\\Php80\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\Symfony\\Polyfill\\Php73\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\Symfony\\Polyfill\\Php73\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php73',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\Symfony\\Polyfill\\Mbstring\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\Symfony\\Polyfill\\Mbstring\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\Symfony\\Polyfill\\Ctype\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\Symfony\\Polyfill\\Ctype\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\Symfony\\Contracts\\Service\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\Symfony\\Contracts\\Service\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/service-contracts',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\Symfony\\Component\\Finder\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\Symfony\\Component\\Finder\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/finder',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\Symfony\\Component\\Console\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\Symfony\\Component\\Console\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/console',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\Roave\\Signature\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\Roave\\Signature\\' =>
         array (
             0 => __DIR__ . '/..' . '/roave/signature/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\RingCentral\\Psr7\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\RingCentral\\Psr7\\' =>
         array (
             0 => __DIR__ . '/..' . '/ringcentral/psr7/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\React\\Stream\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\React\\Stream\\' =>
         array (
             0 => __DIR__ . '/..' . '/react/stream/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\React\\Socket\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\React\\Socket\\' =>
         array (
             0 => __DIR__ . '/..' . '/react/socket/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\React\\Promise\\Timer\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\React\\Promise\\Timer\\' =>
         array (
             0 => __DIR__ . '/..' . '/react/promise-timer/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\React\\Promise\\Stream\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\React\\Promise\\Stream\\' =>
         array (
             0 => __DIR__ . '/..' . '/react/promise-stream/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\React\\Promise\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\React\\Promise\\' =>
         array (
             0 => __DIR__ . '/..' . '/react/promise/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\React\\Http\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\React\\Http\\' =>
         array (
             0 => __DIR__ . '/..' . '/react/http/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\React\\EventLoop\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\React\\EventLoop\\' =>
         array (
             0 => __DIR__ . '/..' . '/react/event-loop/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\React\\Dns\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\React\\Dns\\' =>
         array (
             0 => __DIR__ . '/..' . '/react/dns/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\React\\ChildProcess\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\React\\ChildProcess\\' =>
         array (
             0 => __DIR__ . '/..' . '/react/child-process/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\React\\Cache\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\React\\Cache\\' =>
         array (
             0 => __DIR__ . '/..' . '/react/cache/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\Psr\\Log\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\Psr\\Log\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\Psr\\Http\\Message\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\Psr\\Http\\Message\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\Psr\\Container\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\Psr\\Container\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/container/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\PhpParser\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\PhpParser\\' =>
         array (
             0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\PackageVersions\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\PackageVersions\\' =>
         array (
             0 => __DIR__ . '/..' . '/composer/package-versions-deprecated/src/PackageVersions',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\PhpDocParser\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\PhpDocParser\\' =>
         array (
             0 => __DIR__ . '/..' . '/phpstan/phpdoc-parser/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\BetterReflection\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\BetterReflection\\' =>
         array (
             0 => __DIR__ . '/..' . '/ondrejmirtes/better-reflection/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\' =>
         array (
             0 => __DIR__ . '/..' . '/phpstan/phpstan-src/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\OndraM\\CiDetector\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\OndraM\\CiDetector\\' =>
         array (
             0 => __DIR__ . '/..' . '/ondram/ci-detector/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\Jean85\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\Jean85\\' =>
         array (
             0 => __DIR__ . '/..' . '/jean85/pretty-package-versions/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\Evenement\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\Evenement\\' =>
         array (
             0 => __DIR__ . '/..' . '/evenement/evenement/src/Evenement',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\Composer\\XdebugHandler\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\Composer\\XdebugHandler\\' =>
         array (
             0 => __DIR__ . '/..' . '/composer/xdebug-handler/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\Composer\\CaBundle\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\Composer\\CaBundle\\' =>
         array (
             0 => __DIR__ . '/..' . '/composer/ca-bundle/src',
         ),
-        'TenantCloud\\BetterReflection\\Relocated\\Clue\\React\\NDJson\\' => 
+        'TenantCloud\\BetterReflection\\Relocated\\Clue\\React\\NDJson\\' =>
         array (
             0 => __DIR__ . '/..' . '/clue/ndjson-react/src',
         ),
-        'Hoa\\Zformat\\' => 
+        'Hoa\\Zformat\\' =>
         array (
             0 => __DIR__ . '/..' . '/hoa/zformat',
         ),
-        'Hoa\\Visitor\\' => 
+        'Hoa\\Visitor\\' =>
         array (
             0 => __DIR__ . '/..' . '/hoa/visitor',
         ),
-        'Hoa\\Ustring\\' => 
+        'Hoa\\Ustring\\' =>
         array (
             0 => __DIR__ . '/..' . '/hoa/ustring',
         ),
-        'Hoa\\Stream\\' => 
+        'Hoa\\Stream\\' =>
         array (
             0 => __DIR__ . '/..' . '/hoa/stream',
         ),
-        'Hoa\\Regex\\' => 
+        'Hoa\\Regex\\' =>
         array (
             0 => __DIR__ . '/..' . '/hoa/regex',
         ),
-        'Hoa\\Protocol\\' => 
+        'Hoa\\Protocol\\' =>
         array (
             0 => __DIR__ . '/..' . '/hoa/protocol',
         ),
-        'Hoa\\Math\\' => 
+        'Hoa\\Math\\' =>
         array (
             0 => __DIR__ . '/..' . '/hoa/math/Source',
         ),
-        'Hoa\\Iterator\\' => 
+        'Hoa\\Iterator\\' =>
         array (
             0 => __DIR__ . '/..' . '/hoa/iterator',
         ),
-        'Hoa\\File\\' => 
+        'Hoa\\File\\' =>
         array (
             0 => __DIR__ . '/..' . '/hoa/file',
         ),
-        'Hoa\\Exception\\' => 
+        'Hoa\\Exception\\' =>
         array (
             0 => __DIR__ . '/..' . '/hoa/exception',
         ),
-        'Hoa\\Event\\' => 
+        'Hoa\\Event\\' =>
         array (
             0 => __DIR__ . '/..' . '/hoa/event',
         ),
-        'Hoa\\Consistency\\' => 
+        'Hoa\\Consistency\\' =>
         array (
             0 => __DIR__ . '/..' . '/hoa/consistency',
         ),
-        'Hoa\\Compiler\\' => 
+        'Hoa\\Compiler\\' =>
         array (
             0 => __DIR__ . '/..' . '/hoa/compiler',
         ),
@@ -1532,9 +1532,12 @@ class ComposerStaticInit18b0bd985af5f45a7de23e6011ab101e
         'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\Type\\Generic\\GenericClassStringType' => __DIR__ . '/..' . '/phpstan/phpstan-src/src/Type/Generic/GenericClassStringType.php',
         'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\Type\\Generic\\GenericObjectType' => __DIR__ . '/..' . '/phpstan/phpstan-src/src/Type/Generic/GenericObjectType.php',
         'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\Type\\Generic\\TemplateBenevolentUnionType' => __DIR__ . '/..' . '/phpstan/phpstan-src/src/Type/Generic/TemplateBenevolentUnionType.php',
+        'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\Type\\Generic\\TemplateGenericObjectType' => __DIR__ . '/..' . '/phpstan/phpstan-src/src/Type/Generic/TemplateGenericObjectType.php',
+        'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\Type\\Generic\\TemplateIntegerType' => __DIR__ . '/..' . '/phpstan/phpstan-src/src/Type/Generic/TemplateIntegerType.php',
         'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\Type\\Generic\\TemplateMixedType' => __DIR__ . '/..' . '/phpstan/phpstan-src/src/Type/Generic/TemplateMixedType.php',
         'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\Type\\Generic\\TemplateObjectType' => __DIR__ . '/..' . '/phpstan/phpstan-src/src/Type/Generic/TemplateObjectType.php',
         'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\Type\\Generic\\TemplateObjectWithoutClassType' => __DIR__ . '/..' . '/phpstan/phpstan-src/src/Type/Generic/TemplateObjectWithoutClassType.php',
+        'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\Type\\Generic\\TemplateStringType' => __DIR__ . '/..' . '/phpstan/phpstan-src/src/Type/Generic/TemplateStringType.php',
         'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\Type\\Generic\\TemplateType' => __DIR__ . '/..' . '/phpstan/phpstan-src/src/Type/Generic/TemplateType.php',
         'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\Type\\Generic\\TemplateTypeArgumentStrategy' => __DIR__ . '/..' . '/phpstan/phpstan-src/src/Type/Generic/TemplateTypeArgumentStrategy.php',
         'TenantCloud\\BetterReflection\\Relocated\\PHPStan\\Type\\Generic\\TemplateTypeFactory' => __DIR__ . '/..' . '/phpstan/phpstan-src/src/Type/Generic/TemplateTypeFactory.php',
@@ -2207,6 +2210,7 @@ class ComposerStaticInit18b0bd985af5f45a7de23e6011ab101e
         'TenantCloud\\BetterReflection\\Relocated\\UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
         'TenantCloud\\BetterReflection\\Relocated\\ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
         'TenantCloud\\BetterReflection\\Relocated\\Webmozart\\Assert\\Assert' => __DIR__ . '/..' . '/webmozart/assert/src/Assert.php',
+        'TenantCloud\\BetterReflection\\Relocated\\Webmozart\\Assert\\InvalidArgumentException' => __DIR__ . '/..' . '/webmozart/assert/src/InvalidArgumentException.php',
         'TenantCloud\\BetterReflection\\Relocated\\Webmozart\\Assert\\Mixin' => __DIR__ . '/..' . '/webmozart/assert/src/Mixin.php',
         'TenantCloud\\BetterReflection\\Relocated\\phpDocumentor\\Reflection\\DocBlock' => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src/DocBlock.php',
         'TenantCloud\\BetterReflection\\Relocated\\phpDocumentor\\Reflection\\DocBlockFactory' => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src/DocBlockFactory.php',

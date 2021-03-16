@@ -86,6 +86,14 @@ class NameScope
     {
         return new self($this->namespace, $this->uses, $this->className, $this->functionName, new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap(\array_merge($this->templateTypeMap->getTypes(), $map->getTypes())));
     }
+    public function unsetTemplateType(string $name) : self
+    {
+        $map = $this->templateTypeMap;
+        if (!$map->hasType($name)) {
+            return $this;
+        }
+        return new self($this->namespace, $this->uses, $this->className, $this->functionName, $this->templateTypeMap->unsetType($name));
+    }
     /**
      * @param mixed[] $properties
      * @return self

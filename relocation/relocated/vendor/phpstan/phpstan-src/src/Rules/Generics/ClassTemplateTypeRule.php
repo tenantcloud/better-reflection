@@ -7,7 +7,6 @@ use TenantCloud\BetterReflection\Relocated\PhpParser\Node;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\Scope;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Node\InClassNode;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Rules\Rule;
-use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeScope;
 /**
  * @implements \PHPStan\Rules\Rule<InClassNode>
  */
@@ -28,12 +27,11 @@ class ClassTemplateTypeRule implements \TenantCloud\BetterReflection\Relocated\P
             return [];
         }
         $classReflection = $scope->getClassReflection();
-        $className = $classReflection->getName();
         if ($classReflection->isAnonymous()) {
             $displayName = 'anonymous class';
         } else {
             $displayName = 'class ' . $classReflection->getDisplayName();
         }
-        return $this->templateTypeCheck->check($node, \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeScope::createWithClass($className), $classReflection->getTemplateTags(), \sprintf('PHPDoc tag @template for %s cannot have existing class %%s as its name.', $displayName), \sprintf('PHPDoc tag @template for %s cannot have existing type alias %%s as its name.', $displayName), \sprintf('PHPDoc tag @template %%s for %s has invalid bound type %%s.', $displayName), \sprintf('PHPDoc tag @template %%s for %s with bound type %%s is not supported.', $displayName));
+        return $this->templateTypeCheck->check($node, $classReflection->getTemplateTags(), \sprintf('PHPDoc tag @template for %s cannot have existing class %%s as its name.', $displayName), \sprintf('PHPDoc tag @template for %s cannot have existing type alias %%s as its name.', $displayName), \sprintf('PHPDoc tag @template %%s for %s has invalid bound type %%s.', $displayName), \sprintf('PHPDoc tag @template %%s for %s with bound type %%s is not supported.', $displayName));
     }
 }

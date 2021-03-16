@@ -42,16 +42,25 @@ class GenericObjectTypeCheck
             } elseif ($templateTypesCount < $genericTypeTypesCount) {
                 $messages[] = \TenantCloud\BetterReflection\Relocated\PHPStan\Rules\RuleErrorBuilder::message(\sprintf($extraTypesMessage, $genericType->describe(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\VerbosityLevel::typeOnly()), $genericTypeTypesCount, $classReflection->getDisplayName(\false), $templateTypesCount, \implode(', ', \array_keys($classReflection->getTemplateTypeMap()->getTypes()))))->build();
             }
-            foreach ($templateTypes as $i => $templateType) {
+            $templateTypesCount = \count($templateTypes);
+            for ($i = 0; $i < $templateTypesCount; $i++) {
                 if (!isset($genericTypeTypes[$i])) {
                     continue;
                 }
-                $boundType = $templateType;
-                if ($templateType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType) {
-                    $boundType = $templateType->getBound();
-                }
+                $templateType = $templateTypes[$i];
+                $boundType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeHelper::resolveToBounds($templateType);
                 $genericTypeType = $genericTypeTypes[$i];
                 if ($boundType->isSuperTypeOf($genericTypeType)->yes()) {
+                    if (!$templateType instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType) {
+                        continue;
+                    }
+                    $map = $templateType->inferTemplateTypes($genericTypeType);
+                    for ($j = 0; $j < $templateTypesCount; $j++) {
+                        if ($i === $j) {
+                            continue;
+                        }
+                        $templateTypes[$j] = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeHelper::resolveTemplateTypes($templateTypes[$j], $map);
+                    }
                     continue;
                 }
                 $messages[] = \TenantCloud\BetterReflection\Relocated\PHPStan\Rules\RuleErrorBuilder::message(\sprintf($typeIsNotSubtypeMessage, $genericTypeType->describe(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\VerbosityLevel::typeOnly()), $genericType->describe(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\VerbosityLevel::typeOnly()), $templateType->describe(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\VerbosityLevel::typeOnly()), $classReflection->getDisplayName(\false)))->build();

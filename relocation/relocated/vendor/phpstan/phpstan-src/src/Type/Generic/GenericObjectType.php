@@ -19,7 +19,7 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypeWithClassName;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\UnionType;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Type\VerbosityLevel;
-final class GenericObjectType extends \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType
+class GenericObjectType extends \TenantCloud\BetterReflection\Relocated\PHPStan\Type\ObjectType
 {
     /** @var array<int, Type> */
     private array $types;
@@ -222,9 +222,19 @@ final class GenericObjectType extends \TenantCloud\BetterReflection\Relocated\PH
             $typesChanged = \true;
         }
         if ($subtractedType !== $this->getSubtractedType() || $typesChanged) {
-            return new static($this->getClassName(), $types, $subtractedType);
+            return $this->recreate($this->getClassName(), $types, $subtractedType);
         }
         return $this;
+    }
+    /**
+     * @param string $className
+     * @param Type[] $types
+     * @param Type|null $subtractedType
+     * @return self
+     */
+    protected function recreate(string $className, array $types, ?\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $subtractedType) : self
+    {
+        return new self($className, $types, $subtractedType);
     }
     public function changeSubtractedType(?\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type $subtractedType) : \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Type
     {

@@ -84,12 +84,15 @@ class TemplateTypeVariance
         if ($a instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType && !$a instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType) {
             return \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic::createYes();
         }
-        if ($b instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\BenevolentUnionType) {
-            $results = [];
-            foreach ($b->getTypes() as $innerType) {
-                $results[] = $this->isValidVariance($a, $innerType);
+        if ($a instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\BenevolentUnionType) {
+            if (!$a->isSuperTypeOf($b)->no()) {
+                return \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic::createYes();
             }
-            return \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic::maxMin(...$results);
+        }
+        if ($b instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\BenevolentUnionType) {
+            if (!$b->isSuperTypeOf($a)->no()) {
+                return \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic::createYes();
+            }
         }
         if ($b instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType && !$b instanceof \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateType) {
             return \TenantCloud\BetterReflection\Relocated\PHPStan\TrinaryLogic::createYes();

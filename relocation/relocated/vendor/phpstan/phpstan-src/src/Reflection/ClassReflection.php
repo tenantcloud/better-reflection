@@ -63,6 +63,8 @@ class ClassReflection implements \TenantCloud\BetterReflection\Relocated\PHPStan
     private array $subclasses = [];
     /** @var string|false|null */
     private $filename;
+    /** @var string|false|null */
+    private $reflectionDocComment;
     /**
      * @param \PHPStan\Reflection\ReflectionProvider $reflectionProvider
      * @param \PHPStan\Type\FileTypeMapper $fileTypeMapper
@@ -650,8 +652,9 @@ class ClassReflection implements \TenantCloud\BetterReflection\Relocated\PHPStan
             $this->templateTypeMap = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap::createEmpty();
             return $this->templateTypeMap;
         }
-        $templateTypeMap = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap(\array_map(function (\TenantCloud\BetterReflection\Relocated\PHPStan\PhpDoc\Tag\TemplateTag $tag) : Type {
-            return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeFactory::fromTemplateTag(\TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeScope::createWithClass($this->getName()), $tag);
+        $templateTypeScope = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeScope::createWithClass($this->getName());
+        $templateTypeMap = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap(\array_map(static function (\TenantCloud\BetterReflection\Relocated\PHPStan\PhpDoc\Tag\TemplateTag $tag) use($templateTypeScope) : Type {
+            return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeFactory::fromTemplateTag($templateTypeScope, $tag);
         }, $this->getTemplateTags()));
         $this->templateTypeMap = $templateTypeMap;
         return $templateTypeMap;
@@ -714,11 +717,13 @@ class ClassReflection implements \TenantCloud\BetterReflection\Relocated\PHPStan
         if ($fileName === \false) {
             return null;
         }
-        $docComment = $this->reflection->getDocComment();
-        if ($docComment === \false) {
+        if ($this->reflectionDocComment === null) {
+            $this->reflectionDocComment = $this->reflection->getDocComment();
+        }
+        if ($this->reflectionDocComment === \false) {
             return null;
         }
-        return $this->fileTypeMapper->getResolvedPhpDoc($fileName, $this->getName(), null, null, $docComment);
+        return $this->fileTypeMapper->getResolvedPhpDoc($fileName, $this->getName(), null, null, $this->reflectionDocComment);
     }
     private function getFirstExtendsTag() : ?\TenantCloud\BetterReflection\Relocated\PHPStan\PhpDoc\Tag\ExtendsTag
     {

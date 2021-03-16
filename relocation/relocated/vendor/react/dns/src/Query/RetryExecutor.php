@@ -36,7 +36,7 @@ final class RetryExecutor implements \TenantCloud\BetterReflection\Relocated\Rea
                 $deferred->reject($e);
             } elseif ($retries <= 0) {
                 $errorback = null;
-                $deferred->reject($e = new \RuntimeException('DNS query for ' . $query->name . ' failed: too many retries', 0, $e));
+                $deferred->reject($e = new \RuntimeException('DNS query for ' . $query->describe() . ' failed: too many retries', 0, $e));
                 // avoid garbage references by replacing all closures in call stack.
                 // what a lovely piece of code!
                 $r = new \ReflectionProperty('Exception', 'trace');

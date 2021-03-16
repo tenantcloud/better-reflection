@@ -41,6 +41,8 @@ class FileTypeMapper
     private array $resolvedPhpDocBlockCache = [];
     /** @var array<string, bool> */
     private array $alreadyProcessedDependentFiles = [];
+    /** @var array<string, string> */
+    private array $docKeys = [];
     public function __construct(\TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ReflectionProvider\ReflectionProviderProvider $reflectionProviderProvider, \TenantCloud\BetterReflection\Relocated\PHPStan\Parser\Parser $phpParser, \TenantCloud\BetterReflection\Relocated\PHPStan\PhpDoc\PhpDocStringResolver $phpDocStringResolver, \TenantCloud\BetterReflection\Relocated\PHPStan\PhpDoc\PhpDocNodeResolver $phpDocNodeResolver, \TenantCloud\BetterReflection\Relocated\PHPStan\Cache\Cache $cache, \TenantCloud\BetterReflection\Relocated\PHPStan\Broker\AnonymousClassNameHelper $anonymousClassNameHelper)
     {
         $this->reflectionProviderProvider = $reflectionProviderProvider;
@@ -89,6 +91,11 @@ class FileTypeMapper
         $templateTags = $this->phpDocNodeResolver->resolveTemplateTags($phpDocNode, $nameScope);
         $templateTypeScope = $nameScope->getTemplateTypeScope();
         if ($templateTypeScope !== null) {
+            $templateTypeMap = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap(\array_map(static function (\TenantCloud\BetterReflection\Relocated\PHPStan\PhpDoc\Tag\TemplateTag $tag) use($templateTypeScope) : Type {
+                return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeFactory::fromTemplateTag($templateTypeScope, $tag);
+            }, $templateTags));
+            $nameScope = $nameScope->withTemplateTypeMap(new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap(\array_merge($nameScope->getTemplateTypeMap()->getTypes(), $templateTypeMap->getTypes())));
+            $templateTags = $this->phpDocNodeResolver->resolveTemplateTags($phpDocNode, $nameScope);
             $templateTypeMap = new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeMap(\array_map(static function (\TenantCloud\BetterReflection\Relocated\PHPStan\PhpDoc\Tag\TemplateTag $tag) use($templateTypeScope) : Type {
                 return \TenantCloud\BetterReflection\Relocated\PHPStan\Type\Generic\TemplateTypeFactory::fromTemplateTag($templateTypeScope, $tag);
             }, $templateTags));
@@ -382,7 +389,11 @@ class FileTypeMapper
     }
     private function getPhpDocKey(?string $class, ?string $trait, ?string $function, string $docComment) : string
     {
-        $docComment = \TenantCloud\BetterReflection\Relocated\Nette\Utils\Strings::replace($docComment, '#\\s+#', ' ');
+        $cacheKey = \md5($docComment);
+        if (!isset($this->docKeys[$cacheKey])) {
+            $this->docKeys[$cacheKey] = \TenantCloud\BetterReflection\Relocated\Nette\Utils\Strings::replace($docComment, '#\\s+#', ' ');
+        }
+        $docComment = $this->docKeys[$cacheKey];
         return \md5(\sprintf('%s-%s-%s-%s', $class, $trait, $function, $docComment));
     }
     /**

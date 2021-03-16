@@ -3057,6 +3057,38 @@ class NodeScopeResolverTest extends \TenantCloud\BetterReflection\Relocated\PHPS
     {
         return $this->gatherAssertTypes(__DIR__ . '/data/bug-4498.php');
     }
+    public function dataBug4587() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/bug-4587.php');
+    }
+    public function dataBug4606() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/bug-4606.php');
+    }
+    public function dataNestedGenericTypes() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/nested-generic-types.php');
+    }
+    public function dataBug3922() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/bug-3922.php');
+    }
+    public function dataNestedGenericTypesUnwrapping() : array
+    {
+        return \array_merge($this->gatherAssertTypes(__DIR__ . '/data/nested-generic-types-unwrapping.php'), $this->gatherAssertTypes(__DIR__ . '/data/nested-generic-types-unwrapping-covariant.php'));
+    }
+    public function dataNestedGenericIncompleteConstructor() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/nested-generic-incomplete-constructor.php');
+    }
+    public function dataIteratorIterator() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/iterator-iterator.php');
+    }
+    public function dataBug4642() : array
+    {
+        return $this->gatherAssertTypes(__DIR__ . '/data/bug-4642.php');
+    }
     /**
      * @param string $file
      * @return array<string, mixed[]>
@@ -3289,6 +3321,14 @@ class NodeScopeResolverTest extends \TenantCloud\BetterReflection\Relocated\PHPS
      * @dataProvider dataBug3769
      * @dataProvider dataBugInstanceOfClassString
      * @dataProvider dataBug4498
+     * @dataProvider dataBug4587
+     * @dataProvider dataBug4606
+     * @dataProvider dataNestedGenericTypes
+     * @dataProvider dataBug3922
+     * @dataProvider dataNestedGenericTypesUnwrapping
+     * @dataProvider dataNestedGenericIncompleteConstructor
+     * @dataProvider dataIteratorIterator
+     * @dataProvider dataBug4642
      * @param string $assertType
      * @param string $file
      * @param mixed ...$args

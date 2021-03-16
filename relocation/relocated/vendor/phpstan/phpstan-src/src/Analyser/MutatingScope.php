@@ -38,6 +38,7 @@ use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Native\NativeParam
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptor;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\ParametersAcceptorSelector;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PassedByReference;
+use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Php\DummyParameter;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Php\PhpFunctionFromParserNodeReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Php\PhpMethodFromParserNodeReflection;
 use TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PropertyReflection;
@@ -872,7 +873,19 @@ class MutatingScope implements \TenantCloud\BetterReflection\Relocated\PHPStan\A
                     $returnType = \TenantCloud\BetterReflection\Relocated\PHPStan\Type\TypehintHelper::decideType($this->getFunctionType($node->returnType, \false, \false), $returnType);
                 }
             } else {
-                $closureScope = $this->enterAnonymousFunctionWithoutReflection($node);
+                $callableParameters = null;
+                $arg = $node->getAttribute('parent');
+                if ($arg instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Arg) {
+                    $funcCall = $arg->getAttribute('parent');
+                    $argOrder = $arg->getAttribute('expressionOrder');
+                    if ($funcCall instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Expr\FuncCall && $funcCall->name instanceof \TenantCloud\BetterReflection\Relocated\PhpParser\Node\Name) {
+                        $functionName = $this->reflectionProvider->resolveFunctionName($funcCall->name, $this);
+                        if ($functionName === 'array_map' && $argOrder === 0 && isset($funcCall->args[1])) {
+                            $callableParameters = [new \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\Php\DummyParameter('item', $this->getType($funcCall->args[1]->value)->getIterableValueType(), \false, \TenantCloud\BetterReflection\Relocated\PHPStan\Reflection\PassedByReference::createNo(), \false, null)];
+                        }
+                    }
+                }
+                $closureScope = $this->enterAnonymousFunctionWithoutReflection($node, $callableParameters);
                 $closureReturnStatements = [];
                 $closureYieldStatements = [];
                 $closureExecutionEnds = [];

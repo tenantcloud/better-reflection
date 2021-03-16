@@ -44,8 +44,10 @@ class PhpDocNodeResolver
      */
     public function resolveVarTags(\TenantCloud\BetterReflection\Relocated\PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocNode $phpDocNode, \TenantCloud\BetterReflection\Relocated\PHPStan\Analyser\NameScope $nameScope) : array
     {
-        foreach (['@phpstan-var', '@psalm-var', '@var'] as $tagName) {
-            $resolved = [];
+        $resolved = [];
+        $resolvedByTag = [];
+        foreach (['@var', '@psalm-var', '@phpstan-var'] as $tagName) {
+            $tagResolved = [];
             foreach ($phpDocNode->getVarTagValues($tagName) as $tagValue) {
                 $type = $this->typeNodeResolver->resolve($tagValue->type, $nameScope);
                 if ($this->shouldSkipType($tagName, $type)) {
@@ -55,14 +57,19 @@ class PhpDocNodeResolver
                     $variableName = \substr($tagValue->variableName, 1);
                     $resolved[$variableName] = new \TenantCloud\BetterReflection\Relocated\PHPStan\PhpDoc\Tag\VarTag($type);
                 } else {
-                    $resolved[] = new \TenantCloud\BetterReflection\Relocated\PHPStan\PhpDoc\Tag\VarTag($type);
+                    $varTag = new \TenantCloud\BetterReflection\Relocated\PHPStan\PhpDoc\Tag\VarTag($type);
+                    $tagResolved[] = $varTag;
                 }
             }
-            if (\count($resolved) > 0) {
-                return $resolved;
+            if (\count($tagResolved) === 0) {
+                continue;
             }
+            $resolvedByTag[] = $tagResolved;
         }
-        return [];
+        if (\count($resolvedByTag) > 0) {
+            return \array_reverse($resolvedByTag)[0];
+        }
+        return $resolved;
     }
     /**
      * @param PhpDocNode $phpDocNode
@@ -192,7 +199,7 @@ class PhpDocNodeResolver
                     continue;
                 }
             }
-            $resolved[$valueNode->name] = new \TenantCloud\BetterReflection\Relocated\PHPStan\PhpDoc\Tag\TemplateTag($valueNode->name, $valueNode->bound !== null ? $this->typeNodeResolver->resolve($valueNode->bound, $nameScope) : new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType(), $variance);
+            $resolved[$valueNode->name] = new \TenantCloud\BetterReflection\Relocated\PHPStan\PhpDoc\Tag\TemplateTag($valueNode->name, $valueNode->bound !== null ? $this->typeNodeResolver->resolve($valueNode->bound, $nameScope->unsetTemplateType($valueNode->name)) : new \TenantCloud\BetterReflection\Relocated\PHPStan\Type\MixedType(), $variance);
             $resolvedPrefix[$valueNode->name] = $prefix;
         }
         return $resolved;

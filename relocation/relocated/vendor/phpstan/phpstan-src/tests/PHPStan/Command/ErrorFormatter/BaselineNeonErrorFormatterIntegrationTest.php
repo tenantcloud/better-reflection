@@ -15,14 +15,14 @@ class BaselineNeonErrorFormatterIntegrationTest extends \TenantCloud\BetterRefle
 {
     public function testErrorWithTrait() : void
     {
-        $output = $this->runPhpStan(__DIR__ . '/data/', null);
+        $output = $this->runPhpStan(__DIR__ . '/data/', __DIR__ . '/empty.neon');
         $errors = \TenantCloud\BetterReflection\Relocated\Nette\Utils\Json::decode($output, \TenantCloud\BetterReflection\Relocated\Nette\Utils\Json::FORCE_ARRAY);
         $this->assertSame(10, \array_sum($errors['totals']));
         $this->assertCount(6, $errors['files']);
     }
     public function testGenerateBaselineAndRunAgainWithIt() : void
     {
-        $output = $this->runPhpStan(__DIR__ . '/data/', null, 'baselineNeon');
+        $output = $this->runPhpStan(__DIR__ . '/data/', __DIR__ . '/empty.neon', 'baselineNeon');
         $baselineFile = __DIR__ . '/../../../../baseline.neon';
         \file_put_contents($baselineFile, $output);
         $output = $this->runPhpStan(__DIR__ . '/data/', $baselineFile);

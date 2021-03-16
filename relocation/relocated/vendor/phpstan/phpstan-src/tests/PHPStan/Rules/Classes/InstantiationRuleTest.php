@@ -85,4 +85,8 @@ class InstantiationRuleTest extends \TenantCloud\BetterReflection\Relocated\PHPS
     {
         $this->analyse([__DIR__ . '/data/bug-1711.php'], []);
     }
+    public function testBug3425() : void
+    {
+        $this->analyse([__DIR__ . '/data/bug-3425.php'], [['Parameter #1 $iterator of class RecursiveIteratorIterator constructor expects T of IteratorAggregate|RecursiveIterator, Generator<int, int, mixed, void> given.', 5]]);
+    }
 }
